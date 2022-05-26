@@ -1,6 +1,9 @@
 package com.qf.smartplatform.service;
 
 import com.qf.smartplatform.dto.UserDto;
+import com.qf.smartplatform.pojo.SysUserInfo;
+
+import java.util.Date;
 
 /**
  * @author Administrator
@@ -13,4 +16,8 @@ import com.qf.smartplatform.dto.UserDto;
 
 public interface SysUserService {
     void addUser(UserDto userDto);
+
+    SysUserInfo login(UserDto userDto);
+
+    void updateLogin(String loginName, Date processTime, String ip);
 }

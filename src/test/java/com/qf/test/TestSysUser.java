@@ -40,4 +40,16 @@ public class TestSysUser {
         userDto.setPhone("13344444444");
         userService.addUser(userDto);
     }
+
+    @Test
+    public void testLogin(){
+        UserDto userDto = new UserDto();
+        userDto.setUsername("ceshi");
+        userDto.setPassword("mima");
+        userDto.setSex(1L);
+        userDto.setName("测试");
+        userDto.setEmail("ceshi@ceshi.com");
+        userDto.setPhone("13344444444");
+        userService.login(userDto);
+    }
 }

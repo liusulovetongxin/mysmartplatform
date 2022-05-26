@@ -2,7 +2,11 @@ package com.qf.smartplatform.mapper;
 
 import com.qf.smartplatform.pojo.SysUserInfo;
 import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
+
+import java.util.Date;
 
 /**
  * @author Administrator
@@ -21,4 +25,6 @@ public interface SysUserMapper {
     SysUserInfo findByPhone(String phone);
     @Insert("INSERT INTO sys_user_info (username,password,pwd_salt,`name`,phone,email,sex,avator,info,`type`,status,create_time,create_by,remark) VALUES(#{username},#{password},#{pwdSalt},#{name},#{phone},#{email},#{sex},#{avator},#{info},#{type},#{status},#{createTime},#{createBy},#{remark})")
     void addUser(SysUserInfo sysUserInfo);
+    @Update("update sys_user_info set current_login =last_login,last_login=#{processTime},current_login_ip=last_login_ip,last_login_ip=#{ip} where username=#{loginName}")
+    void updateLogin(@Param("loginName") String loginName,@Param("processTime") Date processTime,@Param("ip") String ip);
 }
