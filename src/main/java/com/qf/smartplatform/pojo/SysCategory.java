@@ -2,6 +2,7 @@ package com.qf.smartplatform.pojo;
 
 import lombok.Data;
 import lombok.ToString;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 @Data
@@ -22,6 +23,12 @@ public class SysCategory implements CheckNull {
 
   @Override
   public boolean isEmpty(CheckType type) {
-    return !StringUtils.hasText(categoryName);
+    switch (type){
+      case ADD:
+        return !StringUtils.hasText(categoryName);
+      case UPDATE:
+        return ObjectUtils.isEmpty(cId)||!StringUtils.hasText(categoryName);
+    }
+    return false;
   }
 }

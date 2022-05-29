@@ -20,4 +20,8 @@ public interface SysUserService {
     SysUserInfo login(UserDto userDto);
 
     void updateLogin(String loginName, Date processTime, String ip);
+
+    void updatePWD(String username,String password,String newPassword);
+
+    void updateData(UserDto userDto);
 }

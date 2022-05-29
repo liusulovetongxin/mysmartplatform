@@ -5,6 +5,7 @@ import com.qf.smartplatform.dto.UserDto;
 import com.qf.smartplatform.pojo.SysUserInfo;
 import com.qf.smartplatform.service.SysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -39,6 +40,19 @@ public class SysUserController {
     public R login(@RequestBody UserDto userDto, HttpSession session){
         SysUserInfo userInfo = sysUserService.login(userDto);
         session.setAttribute("user", userInfo);
+        return R.setOk();
+    }
+
+    @PostMapping("/updatepwd")
+    public R updatePWD(String username,String password,String newPassword){
+//        System.err.println(username+" "+password+" "+newPassword);
+        sysUserService.updatePWD(username, password, newPassword);
+        return R.setOk();
+    }
+
+    @PostMapping("/updatedata")
+    public R updateData(@RequestBody UserDto userDto){
+        sysUserService.updateData(userDto);
         return R.setOk();
     }
 }

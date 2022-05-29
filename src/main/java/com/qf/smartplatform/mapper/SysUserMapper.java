@@ -27,4 +27,9 @@ public interface SysUserMapper {
     void addUser(SysUserInfo sysUserInfo);
     @Update("update sys_user_info set current_login =last_login,last_login=#{processTime},current_login_ip=last_login_ip,last_login_ip=#{ip} where username=#{loginName}")
     void updateLogin(@Param("loginName") String loginName,@Param("processTime") Date processTime,@Param("ip") String ip);
+
+    @Update("update sys_user_info set password=#{password},pwd_salt=#{pwdSalt},update_time=#{updateTime},update_by=#{updateBy} where username=#{username}")
+    void updatePWD(SysUserInfo sysUserInfo);
+
+    void updateData(SysUserInfo sysUserInfo);
 }

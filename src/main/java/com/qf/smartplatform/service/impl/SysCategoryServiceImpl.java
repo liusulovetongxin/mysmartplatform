@@ -6,6 +6,7 @@ import com.qf.smartplatform.constans.ResultCode;
 import com.qf.smartplatform.event.CategoryChangeEvent;
 import com.qf.smartplatform.exceptions.AddException;
 import com.qf.smartplatform.exceptions.DeleteDataException;
+import com.qf.smartplatform.exceptions.UpdateException;
 import com.qf.smartplatform.mapper.SysCategoryMapper;
 import com.qf.smartplatform.pojo.CheckType;
 import com.qf.smartplatform.pojo.SysCategory;
@@ -83,6 +84,18 @@ public class SysCategoryServiceImpl implements SysCategoryService {
         });
         SysUserInfo sysUserInfo = SecurityUtils.getSysUserInfo(false);
         sysCategoryMapper.deleteById(cId,new Date(),sysUserInfo.getUsername());
+        context.publishEvent(new CategoryChangeEvent());
+    }
+
+    @Override
+    public void updateCategory(SysCategory sysCategory) {
+        Assert.isTrue(!sysCategory.isEmpty(CheckType.UPDATE), ()->{
+            throw new UpdateException("传递的数据不完成", ResultCode.DATA_NULL);
+        });
+        SysUserInfo sysUserInfo = SecurityUtils.getSysUserInfo(false);
+        sysCategory.setUpdateTime(new Date());
+        sysCategory.setUpdateBy(sysUserInfo.getUsername());
+        sysCategoryMapper.updateCategory(sysCategory);
         context.publishEvent(new CategoryChangeEvent());
     }
 }

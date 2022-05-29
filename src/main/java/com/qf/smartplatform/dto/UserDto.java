@@ -35,6 +35,13 @@ public class UserDto implements CheckNull {
                     || !StringUtils.hasText(phone)
                     || !StringUtils.hasText(email)
                     || (ObjectUtils.isEmpty(sex)||(!sex.equals(1L)&&!sex.equals(2L)));
+            case UPDATE:
+                return !StringUtils.hasText(username)
+                    && !StringUtils.hasText(password)
+                    && !StringUtils.hasText(name)
+                    && !StringUtils.hasText(phone)
+                    && !StringUtils.hasText(email)
+                    && (ObjectUtils.isEmpty(sex)||(!sex.equals(1L)&&!sex.equals(2L)));
         }
         return false;
     }

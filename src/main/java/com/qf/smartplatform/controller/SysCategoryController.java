@@ -39,4 +39,10 @@ public class SysCategoryController {
         sysCategoryService.deleteById(cId);
         return R.setOk();
     }
+    @PostMapping("/updatecategory")
+    public R updateCategory(@RequestBody SysCategory sysCategory){
+        System.err.println(sysCategory);
+        sysCategoryService.updateCategory(sysCategory);
+        return R.setOk();
+    }
 }

@@ -5,11 +5,13 @@ import com.qf.smartplatform.dto.UserDto;
 import com.qf.smartplatform.event.LoginEvent;
 import com.qf.smartplatform.exceptions.AddException;
 import com.qf.smartplatform.exceptions.QueryException;
+import com.qf.smartplatform.exceptions.UpdateException;
 import com.qf.smartplatform.mapper.SysUserMapper;
 import com.qf.smartplatform.pojo.CheckType;
 import com.qf.smartplatform.pojo.SysUserInfo;
 import com.qf.smartplatform.service.SysUserService;
 import com.qf.smartplatform.utils.MyStringUtils;
+import com.qf.smartplatform.utils.SecurityUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -17,7 +19,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpSession;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
@@ -108,4 +113,53 @@ public class SysUserServiceImpl implements SysUserService {
     public void updateLogin(String loginName, Date processTime, String ip) {
         sysUserMapper.updateLogin(loginName,processTime,ip);
     }
+
+    @Override
+    public void updatePWD(String username, String password, String newPassword) {
+        SysUserInfo user = SecurityUtils.getSysUserInfo(false);
+        Assert.isTrue(user.getUsername().equalsIgnoreCase(username), ()->{
+            throw new UpdateException("传入的用户名和当前用户不是同一人", ResultCode.USERNAME_PASSWORD_ERROR);
+        });
+        Assert.notNull(password, ()->{
+            throw new UpdateException("密码不能为空",ResultCode.USERNAME_PASSWORD_ERROR);
+        });
+        Assert.notNull(newPassword, ()->{
+            throw new UpdateException("密码不能为空",ResultCode.USERNAME_PASSWORD_ERROR);
+        });
+        Assert.isTrue(DigestUtils.md5DigestAsHex((password+user.getPwdSalt()).getBytes(StandardCharsets.UTF_8)).equalsIgnoreCase(user.getPassword()),()->{
+            throw new UpdateException("原密码不正确", ResultCode.USERNAME_PASSWORD_ERROR);
+        });
+
+        SysUserInfo sysUserInfo = new SysUserInfo();
+        sysUserInfo.setUsername(username);
+        String palt = MyStringUtils.createRandomString(10);
+        sysUserInfo.setPwdSalt(palt);
+        String newPWD = DigestUtils.md5DigestAsHex((newPassword+palt).getBytes(StandardCharsets.UTF_8));
+        sysUserInfo.setPassword(newPWD);
+        sysUserInfo.setUpdateTime(new Date());
+        sysUserInfo.setUpdateBy(username);
+        sysUserMapper.updatePWD(sysUserInfo);
+        ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpSession session = requestAttributes.getRequest().getSession();
+        session.removeAttribute("user");
+    }
+
+    @Override
+    public void updateData(UserDto userDto) {
+        Assert.isTrue(!userDto.isEmpty(CheckType.UPDATE),()->{
+            throw new UpdateException("传递的数据不完整", ResultCode.DATA_NULL);
+        });
+        SysUserInfo sysUserInfo = new SysUserInfo();
+        BeanUtils.copyProperties(userDto,sysUserInfo);
+        SysUserInfo userInfo = SecurityUtils.getSysUserInfo(false);
+        sysUserInfo.setUsername(userInfo.getUsername());
+        sysUserInfo.setUpdateTime(new Date());
+        sysUserInfo.setUpdateBy(userInfo.getUsername());
+//        System.err.println(sysUserInfo);
+        sysUserMapper.updateData(sysUserInfo);
+        HttpSession session = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest().getSession();
+        session.removeAttribute("user");
+        session.setAttribute("user", sysUserInfo);
+    }
+
 }

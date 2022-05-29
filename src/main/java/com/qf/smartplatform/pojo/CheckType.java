@@ -10,5 +10,5 @@ package com.qf.smartplatform.pojo;
  */
 
 public enum CheckType {
-    ADD,UPDATE
+    ADD,UPDATE,UPDATEPWD
 }

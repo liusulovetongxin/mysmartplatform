@@ -17,4 +17,6 @@ public interface SysCategoryService {
     PageInfo<SysCategory> findAll(int pageSize,int pageNum);
 
     void deleteById(Long cId);
+
+    void updateCategory(SysCategory sysCategory);
 }
