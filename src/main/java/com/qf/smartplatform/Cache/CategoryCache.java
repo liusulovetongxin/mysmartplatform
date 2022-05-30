@@ -11,7 +11,9 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -30,12 +32,16 @@ public class CategoryCache {
 
     private List<SysCategory> allEnableList = new ArrayList<>();
 
-
+    private Map<Long,SysCategory> key2CategoryMap = new HashMap<>();
     public List<SysCategory> getCategoryList(boolean isAll){
         if (!isAll){
             return allEnableList;
         }
         return categoryList;
+    }
+
+    public SysCategory getById(Long cId){
+        return key2CategoryMap.get(cId);
     }
 
     private SysCategoryMapper sysCategoryMapper;
@@ -51,6 +57,13 @@ public class CategoryCache {
         List<SysCategory> list = sysCategoryMapper.findAll();
         categoryList.clear();
         categoryList.addAll(list);
+        key2CategoryMap.clear();
+        key2CategoryMap
+                .putAll(categoryList
+                        .stream()
+                        .collect(Collectors
+                                        .toMap(SysCategory::getCId,
+                                                sysCategory -> sysCategory)));
         List<SysCategory> list2 = categoryList.stream().filter(sysCategory -> sysCategory.getStatus() == 1).collect(Collectors.toList());
         allEnableList.clear();
         allEnableList.addAll(list2);

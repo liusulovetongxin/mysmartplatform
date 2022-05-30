@@ -18,4 +18,11 @@ public interface ResultCode {
     int USERNAME_PASSWORD_NULL =4;//用户名是空的
     int USERNAME_PASSWORD_ERROR =5;//用户名密码错误
     int DATA_EXIST = 6;//数据已经存在
+
+    int CATEGORY_NOT_EXIST = 7;
+    int DEVICE_NOT_EXIST = 8;
+    int DATA_ALREADY_EXIST = 9;// 场景已经存在
+    int SCENE_NOT_EXIST = 10;// 场景不存在
+    int DEVICE_ALREADY_BIND = 11;
+    int DEVICE_STATUS_NOT_MATCH = 12;
 }
