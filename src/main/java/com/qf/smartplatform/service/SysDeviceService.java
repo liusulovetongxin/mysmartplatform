@@ -1,6 +1,9 @@
 package com.qf.smartplatform.service;
 
 import com.qf.smartplatform.dto.SysDeviceDto;
+import com.qf.smartplatform.pojo.SysDevice;
+
+import java.util.List;
 
 /**
  * @author Administrator
@@ -17,4 +20,7 @@ public interface SysDeviceService {
     int update2Sell(String deviceId);
 
     int bindDevice(String deviceId,Long sceneId);
+
+
+    List<SysDevice> findAllDevices(int page, int limit);
 }

@@ -1,0 +1,327 @@
+<form action="#" class="layui-form">
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label>名称:</label>
+            <div class="layui-inline">
+                <input type="text" name="categoryName" autocomplete="off" placeholder="请输入名称"
+                       class="layui-input">
+            </div>
+            状态:
+            <div class="layui-inline">
+                <select name="status">
+                    <option value="-100">请选择</option>
+                    <option value="0">无效</option>
+                    <option value="1">有效</option>
+                </select>
+            </div>
+            <button class="layui-btn" lay-submit lay-filter="category-table">搜索</button>
+        </div>
+    </div>
+</form>
+<script type="text/html" id="category-head-bar">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="goEdit"><i class="layui-icon">&#xe654;</i>添加</button>
+<!--        <button class="layui-btn layui-btn-sm" onclick="changeIsAllTrue()"><i class="layui-icon">&#xe654;</i>显示全部</button>-->
+<!--        <button class="layui-btn layui-btn-sm" onclick="changeIsAllFalse()"><i class="layui-icon">&#xe654;</i>只显示有效的</button>-->
+        <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete"><i class="layui-icon">&#xe640;</i>删除 </button>
+        <button class="layui-btn layui-btn-sm layui-btn-normal" lay-event="enable"><i class="layui-icon">&#xe640;</i>启用 </button>
+
+    </div>
+</script>
+<script type="text/html" id="category-category-bar">
+    <a class="layui-btn layui-btn-xs" lay-event="edit-category">编辑</a>
+</script>
+<table class="layui-table" lay-filter="category-table" id="category-table">
+</table>
+<script type="text/javascript" >
+    // var isAll = true;
+    // function changeIsAllTrue() {
+    //     isAll = true;
+    // }
+    // function changeIsAllFalse() {
+    //     isAll = false;
+    // }
+
+    layui.use(['table', 'layer', 'form'], function () {
+        var table = layui.table;
+        var layer = layui.layer;
+        var form = layui.form;
+        form.render();
+        table.render({
+            id: "category-table",
+            elem: '#category-table'
+            , toolbar: '#category-head-bar'
+            , cellMinWidth: 80
+            , url: '/categories/categories' //数据接口
+            , page: true //开启分页
+            ,response: {
+                statusCode: 1 //重新规定成功的状态码为1，table 组件默认为 0
+            }
+            , parseData: function (res) { //将原始数据解析成 table 组件所规定的数据
+                return {
+                    "code": res.code,
+                    "msg": res.msg,
+                    "count": res.result? res.result.total:0, //解析数据长度
+                    "data":res.result? res.result.list:null //解析数据列表
+                };
+            },
+            done: function (res, curr, count) {
+                if (res.code == 401) {
+                    location.href = "/login.html";
+                }
+            }
+            , cols: [[
+                {checkbox: true},
+                //filed代表我们返回的数据中json的key是什么, title代表在页面中显示的列名叫什么
+                {field: 'cid', title: 'ID', sort: true}
+                , {field: 'categoryName', title: '分类名称'}
+                , {field: 'txCommand', title: '下行指令'}
+                , {field: 'rxCommand', title: '上行指令'}
+                , {field: 'commandName', title: '指令映射'}
+                ,
+                {
+                    field: 'status', title: '状态', templet: function (data) {
+                        return (data.status == 1) ? '<span class="layui-badge layui-bg-green">有效</span>' : '<span class="layui-badge layui-bg-red" >无效</span>'
+                    }
+                }
+                , {fixed: 'right', title: '操作', toolbar: '#category-category-bar', width: 180}
+            ]]
+        });
+        //头工具栏事件,也就是整个表格上面的增加删除启用
+        table.on('toolbar(category-table)', function (obj) {
+            switch (obj.event) {
+                case 'goEdit':
+                    openEditWindow(null);
+                    break;
+                case 'delete':
+                    deleteorenable(table, layer,0);
+                    break;
+                case "enable":
+                    deleteorenable(table, layer,1);
+                    break
+            }
+            ;
+        ;
+    });
+    //监听每一行的工具事件
+    table.on('tool(category-table)', function (obj) {
+        var data = obj.data;
+        switch (obj.event) {
+            case 'edit-category': {
+                openEditWindow(data);
+                break;
+            }
+
+        }
+    });
+
+        /**
+         * 删除或者启用我们的分类
+         * @param table
+         * @param layer
+         * @param statusvalue
+         */
+        function deleteorenable(table, layer,statusvalue) {
+            var data = table.checkStatus('category-table').data;
+            console.log(data)
+            if (data.length > 0) {
+                layer.confirm('真的删除行么', function (index) {
+                    var param = [];
+                    $.each(data, function (i, obj) {
+                        // param += "&ids=" + obj.id
+                        // param+=obj.cid+","
+                        param.push(obj.cid);
+                    })
+                    console.log(param);
+
+                    $.ajax({
+                        url: '/categories/categories?status='+statusvalue,
+                        method: 'delete',
+                        data: JSON.stringify(param),
+                        contentType: "application/json;charset=utf-8",
+                        success: function (result) {
+                            if (result.code == 401) {
+                                location.href = "/login.html";
+                                return;
+                            }
+                            if (result.code == 1) {
+                                table.reload('category-table', {});
+                            } else {
+                                alert(result.msg)
+                            }
+                            layer.close(index);
+                        }
+                    })
+                });
+            }
+        }
+
+    function openEditWindow(data) {
+        layer.open({
+            type: 1,
+            content: data == null ? $('#category-add-layer').html():$('#category-edit-layer').html(),
+            title: '编辑'
+            , area: ['500px', '400px'],
+            btn: ['提交', '取消'] //可以无限个按钮
+            , yes: function (index, layero) {
+                layer.load()
+                $.ajax({
+                    url: "/categories/category",
+                  //  url: '/sys/category/update',
+                    contentType:"application/json;charset=UTF-8",
+                    data: data == null ?JSON.stringify($("#category-add-form").serializeJson()):JSON.stringify($("#category-edit-form").serializeJson()),
+                    method: data == null ?'POST' : 'PUT',
+                    success: function (result) {
+                        if (result.code == 401) {
+                            location.href = "/login.html";
+                            return;
+                        }
+                        if (result.code==1) {
+                            table.reload('category-table', {});
+                            layer.close(index);
+                        } else {
+                            alert(result.msg)
+                        }
+                        layer.closeAll('loading');
+                    }
+                })
+            }, success: function (layero, index) {
+                form.render()
+                if (data != null) {
+                    form.val("category-edit-form", data);
+                    form.val("category-edit-form", {
+                        "state": data.state + ""
+                    });
+                }
+
+            }
+        });
+    }
+
+    form.on('submit(category-table)', function (data) {
+        table.reload('category-table', {
+            page: {
+                curr: 1 //重新从第 1 页开始
+            },
+            where: data.field
+        });
+        return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+    });
+
+    })
+    ;
+//自定义函数
+    $.fn.serializeJson = function () {
+        var serializeObj = {};
+        var array = this.serializeArray();
+        $.each(array, function () {
+            if (serializeObj[this.name] !== undefined) {
+                if (!serializeObj[this.name].push) {
+                    serializeObj[this.name] = [serializeObj[this.name]];
+                }
+                serializeObj[this.name].push(this.value || '');
+            } else {
+                serializeObj[this.name] = this.value || '';
+            }
+        });
+        return serializeObj;
+    };
+</script>
+
+<script type="text/html" id="category-edit-layer">
+    <form id="category-edit-form" style="width: 80%" method="post" class="layui-form" lay-filter="category-edit-form">
+        <input type="hidden" name="cid">
+        <div class="layui-form-item">
+            <label class="layui-form-label">分类名</label>
+            <div class="layui-input-block">
+                <input type="text" name="categoryName" required lay-verify="required" placeholder="分类名"
+                       autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">上传指令</label>
+            <div class="layui-input-block">
+                <input type="text" name="rxCommand" required lay-verify="required" placeholder="上传指令"
+                       autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">操作指令</label>
+            <div class="layui-input-block">
+                <input type="text" name="txCommand" required lay-verify="required" placeholder="操作指令"
+                       autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">操作指令映射</label>
+            <div class="layui-input-block">
+                <input type="text" name="commandName" required lay-verify="required" placeholder="指令映射"
+                       autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">状态</label>
+            <div class="layui-input-block">
+                <input type="radio" name="status" title="有效" value="1" />
+                <input type="radio" name="status" title="无效" value="0"/>
+            </div>
+        </div>
+    </form>
+</script>
+
+
+
+<script type="text/html" id="category-add-layer">
+    <form id="category-add-form" style="width: 80%"  method="put" class="layui-form" lay-filter="category-edit-form">
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">分类名</label>
+            <div class="layui-input-block">
+                <input type="text" name="categoryName" required lay-verify="required" placeholder="分类名"
+                       autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">上传指令</label>
+            <div class="layui-input-block">
+                <input type="text" name="rxCommand" required lay-verify="required" placeholder="上传指令"
+                       autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">操作指令</label>
+            <div class="layui-input-block">
+                <input type="text" name="txCommand" required lay-verify="required" placeholder="操作指令"
+                       autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">操作指令映射</label>
+            <div class="layui-input-block">
+                <input type="text" name="commandName" required lay-verify="required" placeholder="操作指令映射"
+                       autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">状态</label>
+            <div class="layui-input-block">
+                <input type="radio" name="status" title="有效" value="1" checked/>
+                <input type="radio" name="status" title="无效" value="0"/>
+            </div>
+        </div>
+
+    </form>
+</script>

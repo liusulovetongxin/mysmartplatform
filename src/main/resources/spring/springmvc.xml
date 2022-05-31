@@ -2,9 +2,11 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:websocket="http://www.springframework.org/schema/websocket"
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd 
+		http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.3.xsd 
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
 
     <context:component-scan base-package="com.qf.smartplatform.controller">
@@ -23,9 +25,18 @@
     <mvc:interceptors>
         <mvc:interceptor>
             <mvc:mapping path="/**"/>
-            <mvc:exclude-mapping path="/sysuser/login"/>
-            <mvc:exclude-mapping path="/sysuser/register"/>
+            <mvc:exclude-mapping path="/sysusers/login"/>
+            <mvc:exclude-mapping path="/sysusers/register"/>
+            <mvc:exclude-mapping path="/websocket/*"/>
+            <mvc:exclude-mapping path="/login.html"/>
+            <mvc:exclude-mapping path="/index.html"/>
+            <mvc:exclude-mapping path="/js/**"/>
+            <mvc:exclude-mapping path="/layui/**"/>
             <ref bean="myLoginInterceptor"/>
         </mvc:interceptor>
     </mvc:interceptors>
+    
+    <websocket:handlers>
+        <websocket:mapping path="/websocket/*" handler="myTextMessageHandler"/>
+    </websocket:handlers>
 </beans>

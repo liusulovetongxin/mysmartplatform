@@ -1,0 +1,618 @@
+<form action="#" class="layui-form">
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label>地址:</label>
+            <div class="layui-inline">
+                <input id="addresssearch" type="text" name="address" autocomplete="off" placeholder="请输入地址"
+                       class="layui-input">
+            </div>
+            状态:
+            <div class="layui-inline">
+                <select name="status" id="statussearch">
+                    <option value="-100">请选择</option>
+                    <option value="0">离线</option>
+                    <option value="1">在线</option>
+                    <option value="2">损坏</option>
+                    <option value="3">待上线</option>
+                </select>
+            </div>
+            分类:
+            <div class="layui-inline">
+                <select name="categoryid" id="categoryidsearch">
+                    <option value="-100">请选择</option>
+                </select>
+            </div>
+<!--            一级区域-->
+<!--            <div class="layui-inline">-->
+<!--                <select id="areasearch" lay-filter="erjicaidan">-->
+<!--                    <option value="-100">请选择</option>-->
+<!--                </select>-->
+<!--            </div>-->
+
+<!--            二级区域-->
+<!--            <div class="layui-inline">-->
+<!--                <select name="areaid" id="areaidsearch">-->
+<!--                    <option value="-100">请选择</option>-->
+<!--                </select>-->
+<!--            </div>-->
+            <button class="layui-btn" lay-submit lay-filter="device-table" lay-event="search">搜索</button>
+        </div>
+    </div>
+</form>
+<script type="text/html" id="device-head-bar">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="goEdit"><i class="layui-icon">&#xe654;</i>添加</button>
+        <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete"><i class="layui-icon">&#xe640;</i>删除
+        </button>
+    </div>
+</script>
+<script type="text/html" id="device-command-bar">
+    <a class="layui-btn layui-btn-sm" lay-event="open">开灯</a>
+    <a class="layui-btn layui-btn-sm" lay-event="close">关灯</a>
+    <a class="layui-btn layui-btn-sm" lay-event="change">变色</a>
+</script>
+
+<script type="text/html" id="device-device-bar">
+    <!--    <a class="layui-btn " lay-event="open">开灯</a>-->
+    <!--    <a class="layui-btn " lay-event="close">关灯</a>-->
+    <a class="layui-btn layui-btn-xs" lay-event="edit-device">编辑</a>
+</script>
+<table class="layui-table" lay-filter="device-table" id="device-table">
+</table>
+<script type="text/javascript">
+    layui.use(['table', 'layer', 'form'], function () {
+        var table = layui.table;
+        var layer = layui.layer;
+        var form = layui.form;
+        form.on('select(erjicaidan)', function (data) {
+            // console.error(data);
+            var parentid = data.value;//一级 id
+            if (parentid == -100) {
+
+            } else {
+                getAreadByParentId(parentid, "areaidsearch", form);
+            }
+
+        })
+        form.on('select(tianjiaquyu)', function (data) {
+            // console.error(data);
+            var parentid = data.value;//一级 id
+            if (parentid == -100) {
+
+            } else {
+                getAreadByParentId(parentid, "areaidedit", form);
+            }
+
+        })
+        form.render();
+        table.render({
+            id: "device-table",
+            elem: '#device-table'
+            , toolbar: '#device-head-bar'
+            , cellMinWidth: 80
+            , url: '/devices/devices' //数据接口
+            , page: true //开启分页
+            , response: {
+                statusCode: 1 //重新规定成功的状态码为1，table 组件默认为 0
+            }
+            , parseData: function (res) { //将原始数据解析成 table 组件所规定的数据
+                return {
+                    "code": res.code,
+                    "msg": res.msg,
+                    "count": res.result ? res.result.total : 0, //解析数据长度
+                    "data": res.result ? res.result.list : null //解析数据列表
+                };
+            },
+            done: function (res, curr, count) {
+                if (res.code == 401) {
+                    location.href = "/login.html";
+                }
+            }
+            , cols: [[
+                {checkbox: true},
+                , {field: 'deviceId', title: '设备标识', width: 110}
+                , {field: 'deviceName', title: '名字', width: 80}
+                , {field: 'categoryName', title: '分类', width: 100, templet: function (data) {
+                        var categoryName=data.category.categoryName;
+                        return '<span class="layui-badge">'+categoryName+'</span>'
+                    }}
+                , {field: 'bindTime', title: '添加时间', width: 180}
+                , {field: 'connectTime', title: '连接时间', width: 180}
+                , {field: 'currentConnectIp', title: '连接IP', width: 180}
+                , {field: 'connectLocation', title: '连接地址', width: 180}
+                , {field: 'lastControlTime', title: '最后控制时间', width: 180}
+                , {
+                    field: 'isOnline', title: '状态', width: 80, templet: function (data) {
+                        if (data.isOnline == 0) {
+                            return '<span class="layui-badge layui-bg-orange">离线</span>'
+                        } else if (data.isOnline == 1) {
+                            return '<span class="layui-badge layui-bg-green">在线</span>'
+                        } else if (data.isOnline == 2) {
+                            return '<span class="layui-badge layui-bg-red">损坏</span>'
+                        } else if (data.isOnline == 3) {
+                            return '<span class="layui-badge layui-bg-blue">待上线</span>'
+                        }
+                    }
+                }
+                // , {title: '命令', toolbar: '#device-command-bar', width: 200}
+                , {
+                    title: '命令', width: 200, templet: function (data) {
+                        var content = '';//要返回的内容
+                        // console.error(json);
+                        var commandname = data.category.commandName;//获取到命令映射json
+                        if (commandname) {
+                            var json = JSON.parse(commandname);
+                            var allkeys = Object.keys(json);//获取到映射所有的 key
+                            // console.error(keys);
+                            for (var i = 0; i < allkeys.length; i++) {//遍历 key
+                                var key = allkeys[i];
+                                var value = json[key];
+                                content = content + '<a class="layui-btn layui-btn-sm" lay-event="' + key + '">' + value + '</a>'
+                            }
+                        }
+                        return content;
+
+                    }
+                }
+                , {fixed: 'right', title: '操作', toolbar: '#device-device-bar', width: 80}
+            ]]
+        });
+        //头工具栏事件
+        table.on('toolbar(device-table)', function (obj) {
+            switch (obj.event) {
+                case 'goEdit':
+                    openEditWindow(null);
+                    break;
+                case 'delete':
+                    var data = table.checkStatus('device-table').data;
+                    if (data.length > 0) {
+                        layer.confirm('真的删除行么', function (index) {
+                            var param = ""
+                            $.each(data, function (i, obj) {
+                                param += "&ids=" + obj.id
+                            })
+                            $.ajax({
+                                url: '/devices/devices?' + param,
+                                method: 'delete',
+                                success: function (result) {
+                                    if (result.code == 401) {
+                                        location.href = "/login.html";
+                                    } else if (result.code == 1) {
+                                        table.reload('device-table', {});
+                                    } else {
+                                        alert(result.message);
+                                    }
+                                    layer.close(index);
+                                }
+                            })
+                        });
+                    }
+                    break;
+                case  'searh':
+                    alert("sousuo")
+
+                    break;
+            }
+        });
+        //监听行工具事件
+        table.on('tool(device-table)', function (obj) {
+            var data = obj.data;
+            switch (obj.event) {
+                case 'edit-device': {
+                    openEditWindow(data);
+                    break;
+
+                }
+                default:
+                    if (obj.event) {
+                        sendcontrol(data.deviceId, obj.event);
+                    }
+                    break;
+                // case 'open': {
+                //     sendcontrol(data.devicesuuid, 'open')
+                //     break;
+                //
+                // }
+                // case 'close': {
+                //     sendcontrol(data.devicesuuid, 'close')
+                //     break;
+                // }
+                // case 'change': {
+                //     sendcontrol(data.devicesuuid, 'change')
+                //     break;
+                // }
+
+            }
+        });
+
+        function openEditWindow(data) {
+            layer.open({
+                type: 1,
+                // content: data == null ? $('#device-add-layer').html() : $('#device-edit-layer').html(),
+                content: $('#device-edit-layer').html(),
+                title: '编辑'
+                , device: ['500px', '400px'],
+                btn: ['提交', '取消'] //可以无限个按钮
+                , yes: function (index, layero) {
+                    layer.load()
+                    $.ajax({
+                        url: "/devices/device",
+                        //  url: '/sys/device/update',
+                        contentType: "application/json;charset=UTF-8",
+                        data: JSON.stringify($("#device-edit-form").serializeJson()),
+                        method: data == null ? 'POST' : 'PUT',
+                        success: function (result) {
+                            if (result.code == 401) {
+                                location.href = "/login.html";
+                                return;
+                            }
+                            if (result.code == 1) {
+                                table.reload('device-table', {});
+                                layer.close(index);
+                            } else {
+                                alert(result.msg)
+                            }
+                            layer.closeAll('loading');
+                        }
+                    })
+                }, success: function (layero, index) {
+                    form.render()
+                    if (data != null) {
+                        form.val("device-edit-form", data);
+                        form.val("device-edit-form", {
+                            "state": data.state + ""
+                        });
+                    }
+//                     $.ajax({
+//
+//                         url: data == null ? "/areas/areas/parent?status=1" : "/areas/areas?limit=100000&status=1",
+//                         method: "get",
+//                         success: function (res) {
+//                             if (res.code == 401) {
+//                                 location.href = "/login.html";
+//                                 return;
+//                             }
+//                             //如果是添加,则只需要展示一个下拉框
+//
+// //areaparentadd,areaidadd
+// //areaparentidedit,areaidedit
+//                             if (data) {
+//                                 console.error(data);
+//                                 for (var i = 0; i < res.result.list.length; i++) {
+//                                     var jsondata = res.result.list[i];
+//                                     var parentid = jsondata.parentid;
+//                                     if (!parentid) {//如果没有父 id
+//                                         $("#areaparentidedit").append('<option value="' + jsondata.id + '">' + jsondata.areaname + '</option>');
+//                                         continue;
+//                                     }
+//
+//                                     if (data.areaid == jsondata.id) {
+//                                         $("#areaidedit").append('<option selected value="' + jsondata.id + '">' + jsondata.areaname + '</option>');
+//                                         $("#areaparentidedit").val(parentid)
+//                                     } else {
+//                                         $("#areaidedit").append('<option value="' + jsondata.id + '">' + jsondata.areaname + '</option>');
+//                                     }
+//
+//                                 }
+//
+//                             } else {
+//                                 for (var i = 0; i < res.result.length; i++) {
+//                                     var jsondata = res.result[i];
+//                                     $("#areaparentidedit").append('<option value="' + jsondata.id + '">' + jsondata.areaname + '</option>');
+//                                 }
+//                             }
+//                             form.render();//后追加到页面的元素，layui不渲染，必须render
+//                         }
+//                     })
+                    $.ajax({
+
+                        url: "/categories/categories?limit=100000&status=1",
+                        method: "get",
+                        success: function (res) {
+                            if (res.code == 401) {
+                                location.href = "/login.html";
+                                return;
+                            }
+                            for (var i = 0; i < res.result.list.length; i++) {
+                                var jsondata = res.result.list[i];
+                                if (data && data.categoryid == jsondata.id) {
+                                    $("#categoryidedit").append('<option selected value="' + jsondata.cId + '">' + jsondata.categoryName + '</option>');
+                                } else {
+                                    $("#categoryidedit").append('<option value="' + jsondata.cId + '">' + jsondata.categoryName + '</option>');
+                                }
+
+                            }
+                            form.render();//后追加到页面的元素，layui不渲染，必须render
+                        }
+                    })
+                }
+            });
+        }
+
+        form.on('submit(device-table)', function (data) {
+            table.reload('device-table', {
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                },
+                where: data.field
+            });
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        });
+
+        $.ajax({
+            url: "/categories/categories?limit=100000&status=1",
+            method: "get",
+            success: function (res) {
+                if (res.code == 401) {
+                    location.href = "/login.html";
+                    return;
+                }
+                for (var i = 0; i < res.result.list.length; i++) {
+                    var jsondata = res.result.list[i];
+
+                    $("#categoryidsearch").append('<option value="' + jsondata.cId + '">' + jsondata.categoryName + '</option>');
+
+                    form.render();//后追加到页面的元素，layui不渲染，必须render
+                }
+            }
+        })
+        // $.ajax({
+        //     url: '/areas/areas/parent',
+        //     method: 'get',
+        //     success: function (result) {
+        //         console.error(result)
+        //         for (var i = 0; i < result.result.length; i++) {
+        //             var json = result.result[i];//拿到数据
+        //             //返回结果之后干什么,解析每一个分类的数据,添加到对应的 select 标签中
+        //             var opt = '<option value="' + json.id + '">' + json.areaname + '</option>';
+        //             $("#areasearch").append(opt);
+        //             form.render();//后追加到页面的元素，layui不渲染，必须render
+        //         }
+        //     }
+        // })
+      //  getParentArean("areasearch", form)
+    })
+
+    //自定义函数
+    $.fn.serializeJson = function () {
+        var serializeObj = {};
+        var array = this.serializeArray();
+        $.each(array, function () {
+            if (serializeObj[this.name] !== undefined) {
+                if (!serializeObj[this.name].push) {
+                    serializeObj[this.name] = [serializeObj[this.name]];
+                }
+                serializeObj[this.name].push(this.value || '');
+            } else {
+                serializeObj[this.name] = this.value || '';
+            }
+        });
+        return serializeObj;
+    };
+
+
+    function sendcontrol(uuid, command) {
+        console.error(uuid, command)
+        $.ajax({
+            url: '/devices/command/' + uuid + '/' + command,
+            method: 'post',
+            success: function (result) {
+                if (result.code == 401) {
+                    location.href = "/login.html";
+                } else {
+                     alert(result.msg)
+                }
+            }
+        })
+    }
+
+    function getParentArean(selectid, form) {
+        $.ajax({
+            url: '/areas/areas/parent',
+            method: 'get',
+            success: function (result) {
+                console.error(result)
+                for (var i = 0; i < result.result.length; i++) {
+                    var json = result.result[i];//拿到数据
+                    //返回结果之后干什么,解析每一个分类的数据,添加到对应的 select 标签中
+                    var opt = '<option value="' + json.id + '">' + json.areaname + '</option>';
+                    // $("#areasearch").append(opt);
+                    $("#" + selectid).append(opt);
+                    form.render();//后追加到页面的元素，layui不渲染，必须render
+                }
+            }
+        })
+    }
+
+    function getAreadByParentId(parentid, selectid, form) {
+        $.ajax({
+            url: '/areas/area/parent/' + parentid,
+            method: 'get',
+            success: function (result) {
+                //清理原先的数据,添加一个默认数据
+                // $("#areaidsearch").empty();
+                // $("#areaidsearch").append('<option value="-100">请选择</option>');
+
+                $("#" + selectid).empty();
+                $("#" + selectid).append('<option value="-100">请选择</option>');
+                console.error(result)
+                for (var i = 0; i < result.result.length; i++) {
+                    var json = result.result[i];//拿到数据
+                    //返回结果之后干什么,解析每一个分类的数据,添加到对应的 select 标签中
+                    //直接添加会导致数据越来越多,先清空数据,再添加
+                    var opt = '<option value="' + json.id + '">' + json.areaname + '</option>';
+                    //$("#areaidsearch").append(opt);
+                    $("#" + selectid).append(opt);
+                }
+                form.render();//后追加到页面的元素，layui不渲染，必须render
+            }
+        });
+    }
+</script>
+
+<script type="text/html" id="device-edit-layer">
+    <form id="device-edit-form" style="width: 80%" method="post" class="layui-form" lay-filter="device-edit-form">
+        <input type="hidden" name="id">
+        <div class="layui-form-item">
+            <label class="layui-form-label">设备编号</label>
+            <div class="layui-input-block">
+                <input type="text" name="deviceId" required lay-verify="required" placeholder="设备编号"
+                       autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">设备名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="deviceName" required lay-verify="required" placeholder="设备名称"
+                       autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">设备分类</label>
+            <div class="layui-input-block">
+
+                <select name="categoryId" id="categoryidedit">
+                    <option value="">请选择</option>
+                </select>
+
+            </div>
+        </div>
+<!--        <div class="layui-form-item">-->
+<!--            <label class="layui-form-label">位置</label>-->
+<!--            <div class="layui-input-block">-->
+<!--                <input type="text" name="address" required lay-verify="required" placeholder="位置"-->
+<!--                       autocomplete="off"-->
+<!--                       class="layui-input">-->
+<!--            </div>-->
+<!--        </div>-->
+
+
+<!--        <div class="layui-form-item">-->
+<!--            <label class="layui-form-label">设备区域</label>-->
+<!--            <div class="layui-input-block">-->
+
+<!--                <select name="areaidparent" id="areaparentidedit" lay-filter="tianjiaquyu">-->
+<!--                    <option value="">请选择</option>-->
+<!--                </select>-->
+<!--                <select name="areaid" id="areaidedit">-->
+<!--                    <option value="">请选择</option>-->
+<!--                </select>-->
+<!--            </div>-->
+<!--        </div>-->
+
+
+<!--        <div class="layui-form-item">-->
+<!--            <label class="layui-form-label">方向</label>-->
+<!--            <div class="layui-input-block">-->
+<!--                <input type="radio" name="direction" title="右边" value="1"/>-->
+<!--                <input type="radio" name="direction" title="左边" value="0"/>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        <div class="layui-form-item">-->
+<!--            <label class="layui-form-label">序号</label>-->
+<!--            <div class="layui-input-block">-->
+<!--                <input type="text" name="num" required lay-verify="required" placeholder="位置"-->
+<!--                       autocomplete="off"-->
+<!--                       class="layui-input">-->
+<!--            </div>-->
+<!--        </div>-->
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">状态</label>
+            <div class="layui-input-block">
+                <input type="radio" name="isOnline" title="离线" value="0"/>
+                <input type="radio" name="isOnline" title="在线" value="1"/>
+                <input type="radio" name="isOnline" title="损坏" value="2"/>
+                <input type="radio" name="isOnline" title="待上线" value="3"/>
+            </div>
+        </div>
+
+    </form>
+</script>
+
+
+<!--<script type="text/html" id="device-add-layer">-->
+<!--    <form id="device-add-form" style="width: 80%" method="put" class="layui-form" lay-filter="device-edit-form">-->
+<!--        <div class="layui-form-item">-->
+<!--            <label class="layui-form-label">设备编号</label>-->
+<!--            <div class="layui-input-block">-->
+<!--                <input type="text" name="devicesuuid" required lay-verify="required" placeholder="设备编号"-->
+<!--                       autocomplete="off"-->
+<!--                       class="layui-input">-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        <div class="layui-form-item">-->
+<!--            <label class="layui-form-label">设备名称</label>-->
+<!--            <div class="layui-input-block">-->
+<!--                <input type="text" name="devicename" required lay-verify="required" placeholder="设备名称"-->
+<!--                       autocomplete="off"-->
+<!--                       class="layui-input">-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        <div class="layui-form-item">-->
+<!--            <label class="layui-form-label">设备分类</label>-->
+<!--            <div class="layui-input-block">-->
+
+<!--                <select name="categoryid" id="categoryidadd">-->
+<!--                    <option value="">请选择</option>-->
+<!--                </select>-->
+
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        <div class="layui-form-item">-->
+<!--            <label class="layui-form-label">位置</label>-->
+<!--            <div class="layui-input-block">-->
+<!--                <input type="text" name="address" required lay-verify="required" placeholder="位置"-->
+<!--                       autocomplete="off"-->
+<!--                       class="layui-input">-->
+<!--            </div>-->
+<!--        </div>-->
+
+
+<!--        <div class="layui-form-item">-->
+<!--            <label class="layui-form-label">设备区域</label>-->
+<!--            <div class="layui-input-block">-->
+
+<!--                <select name="areaparentid" id="areaparentadd">-->
+<!--                    <option value="">请选择</option>-->
+<!--                </select>-->
+<!--                <select name="areaid" id="areaidadd">-->
+<!--                    <option value="">请选择</option>-->
+<!--                </select>-->
+<!--            </div>-->
+<!--        </div>-->
+
+
+<!--        <div class="layui-form-item">-->
+<!--            <label class="layui-form-label">方向</label>-->
+<!--            <div class="layui-input-block">-->
+<!--                <input type="radio" name="direction" title="右边" value="1"/>-->
+<!--                <input type="radio" name="direction" title="左边" value="0"/>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        <div class="layui-form-item">-->
+<!--            <label class="layui-form-label">序号</label>-->
+<!--            <div class="layui-input-block">-->
+<!--                <input type="text" name="num" required lay-verify="required" placeholder="位置"-->
+<!--                       autocomplete="off"-->
+<!--                       class="layui-input">-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        <div class="layui-form-item">-->
+<!--            <label class="layui-form-label">状态</label>-->
+<!--            <div class="layui-input-block">-->
+<!--                <input type="radio" name="status" title="离线" value="0"/>-->
+<!--                <input type="radio" name="status" title="在线" value="1"/>-->
+<!--                <input type="radio" name="status" title="损坏" value="2"/>-->
+<!--                <input type="radio" name="status" title="待上线" value="3" checked/>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </form>-->
+<!--</script>-->

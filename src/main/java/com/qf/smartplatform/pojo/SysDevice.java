@@ -1,5 +1,6 @@
 package com.qf.smartplatform.pojo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.ToString;
 
@@ -12,6 +13,7 @@ public class SysDevice {
   private Long categoryId;
   private Long bindUserId;
   private Long sceneId;
+  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
   private java.util.Date bindTime;
   private Long isOnline;
   private java.util.Date connectTime;
@@ -20,6 +22,8 @@ public class SysDevice {
   private String currentConnectIp;
   private String connectLocation;
   private Long status;
+
+  private SysCategory category;
 
 
 }

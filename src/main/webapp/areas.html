@@ -1,0 +1,293 @@
+<form action="#" class="layui-form">
+    <div class="layui-form-item">
+        <div class="layui-inline">
+            <label>名称:</label>
+            <div class="layui-inline">
+                <input id="areannamesearch" type="text" name="areaname" autocomplete="off" placeholder="请输入名称"
+                       class="layui-input">
+            </div>
+            状态:
+            <div class="layui-inline">
+                <select name="status" id="statussearch">
+                    <option value="-100">请选择</option>
+                    <option value="0">无效</option>
+                    <option value="1">有效</option>
+                </select>
+            </div>
+            <button class="layui-btn" lay-submit lay-filter="area-table" lay-event="search">搜索</button>
+        </div>
+    </div>
+</form>
+<script type="text/html" id="area-head-bar">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="goEdit"><i class="layui-icon">&#xe654;</i>添加</button>
+        <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete"><i class="layui-icon">&#xe640;</i>删除
+        </button>
+    </div>
+</script>
+<script type="text/html" id="area-area-bar">
+    <a class="layui-btn layui-btn-xs" lay-event="edit-area">编辑</a>
+</script>
+<table class="layui-table" lay-filter="area-table" id="area-table">
+</table>
+<script type="text/javascript">
+    layui.use(['table', 'layer', 'form'], function () {
+        var table = layui.table;
+        var layer = layui.layer;
+        var form = layui.form;
+        form.render();
+        table.render({
+            id: "area-table",
+            elem: '#area-table'
+            , toolbar: '#area-head-bar'
+            , cellMinWidth: 80
+            , url: '/areas/areas' //数据接口
+            , page: true //开启分页
+            , response: {
+                statusCode: 1 //重新规定成功的状态码为1，table 组件默认为 0
+            }
+
+            , cols: [[
+                {checkbox: true},
+                {field: 'id', title: 'ID', sort: true}
+                , {field: 'areaname', title: '区域位置'}
+                , {field: 'parentname', title: '父区域'}
+                , {
+                    field: 'status', title: '状态', templet: function (data) {
+                        return (data.status == 1) ? '<span class="layui-badge layui-bg-green">有效</span>' : '<span class="layui-badge layui-bg-red" >无效</span>'
+                    }
+                }
+                , {fixed: 'right', title: '操作', toolbar: '#area-area-bar', width: 180}
+            ]]
+            , parseData: function (res) { //将原始数据解析成 table 组件所规定的数据
+                return {
+                    "code": res.code,
+                    "msg": res.msg,
+                    "count": res.result? res.result.total:0, //解析数据长度
+                    "data":res.result? res.result.list:null //解析数据列表
+                };
+            },
+            done: function (res, curr, count) {
+                if (res.code == 401) {
+                    location.href = "/login.html";
+                }
+            }
+        });
+        //头工具栏事件
+        table.on('toolbar(area-table)', function (obj) {
+            switch (obj.event) {
+                case 'goEdit':
+                    openEditWindow(null);
+                    break;
+                case 'delete':
+                    var data = table.checkStatus('area-table').data;
+                    if (data.length > 0) {
+                        layer.confirm('真的删除行么', function (index) {
+                            var param = ""
+                            $.each(data, function (i, obj) {
+                                param += "&ids=" + obj.id
+                            })
+                            $.ajax({
+                                url: '/areas/areas?' + param,
+                                method: 'delete',
+                                success: function (result) {
+                                    if (result.code == 401) {
+                                        location.href = "/login.html";
+                                    }
+                                    else if (result.code == 1) {
+                                        table.reload('area-table', {});
+                                    } else {
+                                        alert(result.message)
+                                    }
+                                    layer.close(index);
+                                }
+                            })
+                        });
+                    }
+                    break;
+                case  'searh':
+                alert("sousuo")
+
+                    break;
+            }
+            ;
+            ;
+        });
+        //监听行工具事件
+        table.on('tool(area-table)', function (obj) {
+            var data = obj.data;
+            switch (obj.event) {
+                case 'edit-area': {
+                    openEditWindow(data);
+                    break;
+                }
+
+            }
+        });
+
+        function openEditWindow(data) {
+            layer.open({
+                type: 1,
+                content: data == null ? $('#area-add-layer').html() : $('#area-edit-layer').html(),
+                title: '编辑'
+                , area: ['500px', '400px'],
+                btn: ['提交', '取消'] //可以无限个按钮
+                , yes: function (index, layero) {
+                    layer.load()
+                    $.ajax({
+                        url: "/areas/area",
+                        //  url: '/sys/area/update',
+                        contentType: "application/json;charset=UTF-8",
+                        data: data == null ? JSON.stringify($("#area-add-form").serializeJson()) : JSON.stringify($("#area-edit-form").serializeJson()),
+                        method: data == null ? 'POST' : 'PUT',
+                        success: function (result) {
+                            if (result.code == 401) {
+                                location.href = "/login.html";
+                                return;
+                            }
+                             if (result.code == 1) {
+                                table.reload('area-table', {});
+                                layer.close(index);
+                            } else {
+                                alert(result.msg)
+                            }
+                            layer.closeAll('loading');
+                        }
+                    })
+                }, success: function (layero, index) {
+                    form.render()
+                    if (data != null) {
+                        form.val("area-edit-form", data);
+                        form.val("area-edit-form", {
+                            "state": data.state + ""
+                        });
+                    }
+                    $.ajax({
+
+                        url:"/areas/areas/parent?status=1",
+                        method: "get",
+                        success: function (res) {
+                            if (res.code == 401) {
+                                location.href = "/login.html";
+                                return;
+                            }
+                            //如果是添加,则只需要展示一个下拉框
+                            if (data == null) {
+                                for (var i = 0; i < res.result.length; i++) {
+                                    $("#parentidadd").append('<option value="' + res.result[i].id + '">' + res.result[i].areaname + '</option>');
+                                }
+                            }else{
+
+                                for (var i = 0; i < res.result.length; i++) {
+                                    if (data.parentid==res.result[i].id){
+                                        $("#parentidedit").append('<option selected value="' + res.result[i].id + '">' + res.result[i].areaname + '</option>');
+                                    }else{
+
+                                        $("#parentidedit").append('<option value="' + res.result[i].id + '">' + res.result[i].areaname + '</option>');
+                                    }
+                                }
+                            }
+
+                            form.render();//后追加到页面的元素，layui不渲染，必须render
+                        }
+                    })
+                }
+            });
+        }
+
+        form.on('submit(area-table)', function (data) {
+            table.reload('area-table', {
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                },
+                where: data.field
+            });
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        });
+
+    })
+    ;
+    //自定义函数
+    $.fn.serializeJson = function () {
+        var serializeObj = {};
+        var array = this.serializeArray();
+        $.each(array, function () {
+            if (serializeObj[this.name] !== undefined) {
+                if (!serializeObj[this.name].push) {
+                    serializeObj[this.name] = [serializeObj[this.name]];
+                }
+                serializeObj[this.name].push(this.value || '');
+            } else {
+                serializeObj[this.name] = this.value || '';
+            }
+        });
+        return serializeObj;
+    };
+</script>
+
+<script type="text/html" id="area-edit-layer">
+    <form id="area-edit-form" style="width: 80%" method="post" class="layui-form" lay-filter="area-edit-form">
+        <input type="hidden" name="id">
+        <div class="layui-form-item">
+            <label class="layui-form-label">区域位置名</label>
+            <div class="layui-input-block">
+                <input type="text" name="areaname" required lay-verify="required" placeholder="区域位置名"
+                       autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">父区域</label>
+            <div class="layui-input-inline">
+                <select name="parentid" id="parentidedit">
+                    <option value="">请选择</option>
+                </select>
+            </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">状态</label>
+            <div class="layui-input-block">
+                <input type="radio" name="status" title="有效" value="1"/>
+                <input type="radio" name="status" title="无效" value="0"/>
+            </div>
+        </div>
+    </form>
+</script>
+
+
+<script type="text/html" id="area-add-layer">
+    <form id="area-add-form" style="width: 80%" method="put" class="layui-form" lay-filter="area-edit-form">
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">区域位置名</label>
+            <div class="layui-input-block">
+                <input type="text" name="areaname" required lay-verify="required" placeholder="区域位置名"
+                       autocomplete="off"
+                       class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">父区域</label>
+            <div class="layui-input-block">
+
+                <select name="parentid" id="parentidadd">
+                    <option value="">请选择</option>
+                </select>
+            </div>
+        </div>
+
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">状态</label>
+            <div class="layui-input-block">
+                <input type="radio" name="status" title="有效" value="1"/>
+                <input type="radio" name="status" title="无效" value="0"/>
+            </div>
+        </div>
+
+    </form>
+</script>

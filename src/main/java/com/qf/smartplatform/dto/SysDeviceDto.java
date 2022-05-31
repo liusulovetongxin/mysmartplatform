@@ -22,7 +22,6 @@ public class SysDeviceDto implements CheckNull {
     private String deviceName;
     private Long categoryId;
 
-
     @Override
     public boolean isEmpty(CheckType type) {
         switch (type){
@@ -32,4 +31,3 @@ public class SysDeviceDto implements CheckNull {
         return false;
     }
 }
-

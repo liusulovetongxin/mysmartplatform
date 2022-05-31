@@ -67,7 +67,7 @@ public class SysCategoryServiceImpl implements SysCategoryService {
 
     @Override
     public PageInfo<SysCategory> findAll(int pageSize, int pageNum) {
-        List<SysCategory> categoryList = categoryCache.getCategoryList(false);
+        List<SysCategory> categoryList = categoryCache.getCategoryList(true);
         List<SysCategory> result = categoryList.stream()
                 .skip((pageNum - 1) * pageSize)
                 .limit(pageSize)
@@ -96,6 +96,17 @@ public class SysCategoryServiceImpl implements SysCategoryService {
         sysCategory.setUpdateTime(new Date());
         sysCategory.setUpdateBy(sysUserInfo.getUsername());
         sysCategoryMapper.updateCategory(sysCategory);
+        context.publishEvent(new CategoryChangeEvent());
+    }
+
+    @Override
+    public void deleteByIds(List<Long> ids, Long status) {
+        Assert.notEmpty(ids, ()->{
+            throw new DeleteDataException("主键不符合要求", ResultCode.ID_NOTALLOWED);
+        });
+        SysUserInfo sysUserInfo = SecurityUtils.getSysUserInfo(false);
+
+        sysCategoryMapper.deleteByIds(ids,sysUserInfo.getUsername(),new Date(),status);
         context.publishEvent(new CategoryChangeEvent());
     }
 }

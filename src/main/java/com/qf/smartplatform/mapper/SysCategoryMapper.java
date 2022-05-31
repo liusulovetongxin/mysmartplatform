@@ -30,4 +30,6 @@ public interface SysCategoryMapper {
 
     @Update("update sys_category set category_name=#{categoryName},update_time=#{updateTime},update_by=#{updateBy} where c_id = #{cId}")
     void updateCategory(SysCategory sysCategory);
+
+    void deleteByIds(@Param("ids") List<Long> ids,@Param("username") String username,@Param("date") Date date,@Param("status") Long status);
 }

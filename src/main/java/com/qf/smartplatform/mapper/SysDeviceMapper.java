@@ -7,6 +7,8 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.List;
+
 /**
  * @author Administrator
  * @version V1.0
@@ -25,4 +27,7 @@ public interface SysDeviceMapper {
     int update2Sell(String deviceId);
     @Update("UPDATE sys_device SET status=2, bind_user_id=#{bindUserId} ,scene_id =#{sceneId},bind_time=#{bindTime} WHERE device_id =#{deviceId}")
     int bindDevice(SysDevice device);
+
+    @Select("select * from sys_device where bind_user_id = #{uId}")
+    List<SysDevice> findAllDeviceByUserId(@Param("uId") Long uId);
 }

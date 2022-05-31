@@ -17,27 +17,27 @@ import lombok.Data;
 public class R {
     private int code;
     private String msg;
-    private Object data;
+    private Object result;
 
     public static R setOk(){
         return setOk(null);
     }
-    public static R setOk(Object data){
-        return setResult(ResultCode.SUCCESS, "成功", data);
+    public static R setOk(Object result){
+        return setResult(ResultCode.SUCCESS, "成功", result);
     }
     public static R setError(){
         return setError(null);
     }
-    public static R setError(Object data){
-        return setResult(ResultCode.ERROR, "失败", data);
+    public static R setError(Object result){
+        return setResult(ResultCode.ERROR, "失败", result);
     }
 
 
-    public static R setResult(int code,String msg,Object data){
+    public static R setResult(int code,String msg,Object result){
         R r = new R();
         r.setCode(code);
         r.setMsg(msg);
-        r.setData(data);
+        r.setResult(result);
         return r;
     }
 }

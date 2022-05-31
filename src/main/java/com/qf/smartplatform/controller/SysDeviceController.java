@@ -1,7 +1,9 @@
 package com.qf.smartplatform.controller;
 
+import com.github.pagehelper.PageInfo;
 import com.qf.smartplatform.dto.R;
 import com.qf.smartplatform.dto.SysDeviceDto;
+import com.qf.smartplatform.pojo.SysDevice;
 import com.qf.smartplatform.service.SysDeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,12 @@ public class SysDeviceController {
     @Autowired
     public void setSysDeviceService(SysDeviceService sysDeviceService) {
         this.sysDeviceService = sysDeviceService;
+    }
+
+    @GetMapping("/devices")
+    public R devices(@RequestParam(defaultValue = "1") int page,@RequestParam(defaultValue = "10") int limit){
+        PageInfo<SysDevice> pageInfo = new PageInfo<>(sysDeviceService.findAllDevices(page, limit));
+        return R.setOk(pageInfo);
     }
 
     @PostMapping("/adddevice")

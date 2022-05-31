@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        function lianjie() {
+            if ("WebSocket" in window) {
+                var name = document.getElementById("me").value;
+                // 打开一个 web socket
+                ws = new WebSocket("ws://"+document.location.host+"/websocket/" + name);
+
+                ws.onopen = function () {
+                    // Web Socket 已连接上，使用 send() 方法发送数据
+                    filldata("建立连接")
+                };
+
+                ws.onmessage = function (evt) {
+                    var received_msg = evt.data;
+                    filldata(received_msg);
+                };
+
+                ws.onclose = function () {
+                    // 关闭 websocket
+                    filldata("关闭连接")
+                };
+            } else {
+                // 浏览器不支持 WebSocket
+                alert("您的浏览器不支持 WebSocket!");
+            }
+        }
+
+        function send() {
+            //接收者
+            var toUser = document.getElementById("to").value;
+            //内容
+            var content = document.getElementById("content").value;
+            //拼接为一个json
+            var message='{"toUser":"'+toUser+'","msg":"'+content+'"}'
+            ws.send(message);//发送消息
+        }
+
+        function filldata(data) {
+            document.getElementById("neirong").innerHTML = data;
+        }
+    </script>
+
+</head>
+<body>
+用户名:<input id="me">
+<button onclick="lianjie()">连接</button>
+<br>
+接收者: <input id="to"> <br>
+内容: <input id="content"> <br>
+<button onclick="send()">发送</button>
+<br>
+<br>
+<br>
+<span id="neirong"></span>
+</body>
+</html>

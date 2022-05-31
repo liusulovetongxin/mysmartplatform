@@ -1,10 +1,105 @@
 <!DOCTYPE html>
-<html lang="en">
+<html >
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>智能家居管理系统</title>
+    <link rel="stylesheet" href="layui/css/layui.css">
+    <script src="layui/jquery-1.10.2.min.js"
+            type="text/javascript"></script>
 </head>
-<body>
-这不是主页
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">智能家居管理系统</div>
+        <!-- 头部区域（可配合layui已有的水平导航） -->
+<!--        <ul class="layui-nav layui-layout-left">-->
+<!--            <li class="layui-nav-item"><a href="">控制台</a></li>-->
+<!--            <li class="layui-nav-item"><a href="">商品管理</a></li>-->
+<!--            <li class="layui-nav-item"><a href="">用户</a></li>-->
+<!--            <li class="layui-nav-item">-->
+<!--                <a href="javascript:;">其它系统</a>-->
+<!--                <dl class="layui-nav-child">-->
+<!--                    <dd><a href="">邮件管理</a></dd>-->
+<!--                    <dd><a href="">消息管理</a></dd>-->
+<!--                    <dd><a href="">授权管理</a></dd>-->
+<!--                </dl>-->
+<!--            </li>-->
+<!--        </ul>-->
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    <img src="http://t.cn/RCzsdCq" class="layui-nav-img">
+                    贤心
+                </a>
+<!--                <dl class="layui-nav-child">-->
+<!--                    <dd><a href="">基本资料</a></dd>-->
+<!--                    <dd><a href="">安全设置</a></dd>-->
+<!--                </dl>-->
+            </li>
+            <li class="layui-nav-item"><a href="logout">退了</a></li>
+        </ul>
+    </div>
+<!--
+左侧的导航区域,点击后可以在右边显示内容
+-->
+    <div class="layui-side layui-bg-black">
+        <div class="layui-side-scroll">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+            <ul class="layui-nav layui-nav-tree" lay-filter="test" id="left-menu">
+
+            </ul>
+        </div>
+    </div>
+<!--
+右边的空白区域,用于显示左边导航区域内容的
+-->
+    <div class="layui-body" id="main" style="padding-top:20px">
+        <!-- 内容主体区域 -->
+    </div>
+
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+        © qfjava.cn -千锋 Java 教学部
+    </div>
+</div>
+<script src="layui/layui.js"></script>
+
+
+<script type="text/javascript" >
+    //JavaScript代码区域
+    layui.use('element', function () {
+        var element = layui.element;
+        var str = "";//
+        $.ajax({
+            url: "/menus/menus", //异步请求的地址
+            method: "get", //http 的请求方式
+            success: function (json) { //请求结束后执行的操作 ,json 指的是返回的数据
+                if (json.code == 401) {
+                    location.href = "/login.html";
+                    return;
+                }
+                $.each(json.result, function (i, obj) { //遍历 i 代表 index, obj 代表每次遍历的数据
+                    str += '<li class="layui-nav-item layui-nav-itemed">';
+                    //拼接每一个地址
+                    str += '<a class="" href="javascript:;" onclick="openRight(\'' + obj.url + '\')">' + obj.menuName + '</a>';
+                    // if (obj.children.length > 0) {
+                    //     makeMenu(obj.children)
+                    // }
+                    str += '</li>'
+                });
+                $("#left-menu").html(str);
+                //console.log(str);
+                element.render()
+            }
+        })
+
+    });
+
+    function openRight(url) {
+        $("#main").load(url)
+    }
+
+</script>
 </body>
 </html>

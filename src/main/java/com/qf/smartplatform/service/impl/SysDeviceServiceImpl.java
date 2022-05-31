@@ -1,5 +1,6 @@
 package com.qf.smartplatform.service.impl;
 
+import com.github.pagehelper.PageHelper;
 import com.qf.smartplatform.Cache.CategoryCache;
 import com.qf.smartplatform.Cache.SysSceneCache;
 import com.qf.smartplatform.constans.ResultCode;
@@ -108,5 +109,19 @@ public class SysDeviceServiceImpl implements SysDeviceService {
         device.setBindTime(new Date());
         device.setSceneId(sceneId);
         return sysDeviceMapper.bindDevice(device);
+    }
+
+    @Override
+    public List<SysDevice> findAllDevices(int page, int limit) {
+        PageHelper.startPage(page, limit);
+        SysUserInfo sysUserInfo = SecurityUtils.getSysUserInfo(false);
+        Long uId = sysUserInfo.getUId();
+        List<SysDevice> list = sysDeviceMapper.findAllDeviceByUserId(uId);
+        list.forEach(sysDevice ->
+                sysDevice.setCategory(
+                        categoryCache.getById(sysDevice.getCategoryId())
+                )
+                );
+        return list;
     }
 }

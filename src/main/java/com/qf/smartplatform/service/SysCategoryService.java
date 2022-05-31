@@ -3,6 +3,8 @@ package com.qf.smartplatform.service;
 import com.github.pagehelper.PageInfo;
 import com.qf.smartplatform.pojo.SysCategory;
 
+import java.util.List;
+
 /**
  * @author Administrator
  * @version V1.0
@@ -19,4 +21,6 @@ public interface SysCategoryService {
     void deleteById(Long cId);
 
     void updateCategory(SysCategory sysCategory);
+
+    void deleteByIds(List<Long> ids, Long status);
 }

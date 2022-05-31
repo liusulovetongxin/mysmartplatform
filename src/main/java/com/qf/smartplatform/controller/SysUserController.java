@@ -21,7 +21,7 @@ import javax.servlet.http.HttpSession;
  * @Date 2022/5/26 10:42
  */
 @RestController
-@RequestMapping("/sysuser")
+@RequestMapping("/sysusers")
 public class SysUserController {
 
     private SysUserService sysUserService;
@@ -37,7 +37,7 @@ public class SysUserController {
     }
 
     @RequestMapping("/login")
-    public R login(@RequestBody UserDto userDto, HttpSession session){
+    public R login(UserDto userDto, HttpSession session){
         SysUserInfo userInfo = sysUserService.login(userDto);
         session.setAttribute("user", userInfo);
         return R.setOk();

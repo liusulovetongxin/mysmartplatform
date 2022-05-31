@@ -6,6 +6,8 @@ import com.qf.smartplatform.service.SysCategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * @author Administrator
  * @version V1.0
@@ -15,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
  * @Date 2022/5/27 12:03
  */
 @RestController
-@RequestMapping("/category")
+@RequestMapping("/categories")
 public class SysCategoryController {
 
     private SysCategoryService sysCategoryService;
@@ -25,14 +27,20 @@ public class SysCategoryController {
         this.sysCategoryService = sysCategoryService;
     }
 
-    @RequestMapping("/addCategory")
+    @RequestMapping("/category")
     public R addCategory(@RequestBody SysCategory sysCategory){
         sysCategoryService.addCategory(sysCategory);
         return R.setOk();
     }
     @GetMapping("/categories")
-    public R findByPage(int pageSize,int pageNum){
-        return R.setOk(sysCategoryService.findAll(pageSize, pageNum));
+    public R findByPage(int limit,int page){
+        return R.setOk(sysCategoryService.findAll(limit, page));
+    }
+
+    @DeleteMapping("/categories")
+    public R deleteByIds(@RequestBody List<Long> ids,Long status){
+        sysCategoryService.deleteByIds(ids,status);
+        return R.setOk();
     }
     @DeleteMapping("/category/{cId}")
     public R deleteById(@PathVariable Long cId){
