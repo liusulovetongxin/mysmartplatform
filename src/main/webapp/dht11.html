@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<input id="me"> <button id="connect" onclick="lianjie()">连接</button><br>
+<input id="wendu">温度<br>
+<input id="shidu">湿度<br>
+<button id="send" onclick="send()">发送</button><br>
+<br><br><br>
+<button id="close" onclick="wsclose()">关闭</button><br>
+<br>
+<br>
+
+<span id="content"></span>
+</body>
+
+
+<script type="text/javascript">
+    var ws =null;
+
+    function lianjie()
+    {
+        if ("WebSocket" in window)
+        {
+           // alert("您的浏览器支持 WebSocket!");
+            var name = document.getElementById("me").value;
+            // 打开一个 web socket
+            ws = new WebSocket("ws://"+document.location.host+"/humiture/"+name);
+            ws.onopen = function()
+            {
+             setData('打开连接')
+            };
+
+            ws.onmessage = function (evt)
+            {
+                setData(evt.data);
+            };
+
+            ws.onclose = function()
+            {
+             setData('连接关闭')
+            };
+        }
+
+        else
+        {
+            // 浏览器不支持 WebSocket
+            alert("您的浏览器不支持 WebSocket!");
+        }
+    }
+
+    function setData(data){
+        var content = document.getElementById("content");
+        content.innerHTML = data;
+    }
+
+
+
+    function send(){
+        if (ws != null) {
+            var wendu = document.getElementById("wendu").value;///温度
+            var shidu = document.getElementById("shidu").value;//湿度
+
+            var message ='{"temperature":"'+wendu+'","humidity":"'+shidu+'"}';
+            //发送消息
+            ws.send(message);
+        }
+
+
+    }
+
+    function wsclose(){
+        if (ws != null) {
+           ws.close()
+        }
+
+
+    }
+</script>
+</html>

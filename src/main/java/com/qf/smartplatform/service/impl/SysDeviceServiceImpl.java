@@ -1,22 +1,30 @@
 package com.qf.smartplatform.service.impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
 import com.qf.smartplatform.Cache.CategoryCache;
 import com.qf.smartplatform.Cache.SysSceneCache;
 import com.qf.smartplatform.constans.ResultCode;
 import com.qf.smartplatform.dto.SysDeviceDto;
+import com.qf.smartplatform.event.DevicePowerCommandEvent;
+import com.qf.smartplatform.event.DeviceRGBCommandEvent;
 import com.qf.smartplatform.exceptions.AddException;
+import com.qf.smartplatform.exceptions.QueryException;
 import com.qf.smartplatform.exceptions.UpdateException;
 import com.qf.smartplatform.mapper.SysDeviceMapper;
 import com.qf.smartplatform.pojo.*;
 import com.qf.smartplatform.service.SysDeviceService;
+import com.qf.smartplatform.utils.RequestUtil;
 import com.qf.smartplatform.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -29,6 +37,20 @@ import java.util.concurrent.ExecutionException;
  */
 @Service
 public class SysDeviceServiceImpl implements SysDeviceService {
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
+    private ApplicationContext context;
+
+    @Autowired
+    public void setContext(ApplicationContext context) {
+        this.context = context;
+    }
+
     private SysSceneCache sysSceneCache;
 
     @Autowired
@@ -123,5 +145,50 @@ public class SysDeviceServiceImpl implements SysDeviceService {
                 )
                 );
         return list;
+    }
+
+    @Override
+    public void sendControl(String deviceId, String command) {
+        Long categoryId = sysDeviceMapper.findByDeviceId(deviceId).getCategoryId();
+        Assert.notNull(categoryId, ()->{
+            throw new QueryException("设备不存在", ResultCode.ID_NOTALLOWED);
+        });
+        SysCategory sysCategory = categoryCache.getById(categoryId);
+        String txCommand = sysCategory.getTxCommand();
+        Assert.hasText(txCommand, ()->{
+            throw new QueryException("当前设备目前不支持该命令", ResultCode.DEVICE_COMMAND_NOT_SUPPORT);
+        });
+
+        try {
+            Map commandMap = objectMapper.readValue(txCommand, Map.class);
+            Map realCommandMap = (Map) commandMap.get(command);
+            Assert.notEmpty(realCommandMap, ()->{
+                throw new QueryException("当前设备目前不支持该命令", ResultCode.DEVICE_COMMAND_NOT_SUPPORT);
+            });
+            Integer type = (Integer) realCommandMap.get("type");
+            if (type==1){
+                context.publishEvent(new DevicePowerCommandEvent(deviceId, (String) realCommandMap.get("command")));
+            }else if (type==2){
+                context.publishEvent(new DeviceRGBCommandEvent(deviceId, (String) realCommandMap.get("command")));
+            }
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        
+    }
+
+    @Override
+    public void updateDeviceOnlineOffline(String deviceId, String ip) {
+        SysDevice sysDevice = new SysDevice();
+        sysDevice.setDeviceId(deviceId);
+        if (ip!=null){
+            sysDevice.setIsOnline(1L);
+            sysDevice.setConnectTime(new Date());
+            sysDevice.setCurrentConnectIp(ip);
+            sysDevice.setConnectLocation(RequestUtil.getLocationByIp(ip));
+        }else{
+            sysDevice.setIsOnline(0L);
+        }
+        sysDeviceMapper.updateDevice(sysDevice);
     }
 }

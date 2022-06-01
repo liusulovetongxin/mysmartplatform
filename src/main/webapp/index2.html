@@ -8,7 +8,7 @@
             if ("WebSocket" in window) {
                 var name = document.getElementById("me").value;
                 // 打开一个 web socket
-                ws = new WebSocket("ws://"+document.location.host+"/websocket/" + name);
+                ws = new WebSocket("ws://"+document.location.host+"/colorcommand/" + name);
 
                 ws.onopen = function () {
                     // Web Socket 已连接上，使用 send() 方法发送数据

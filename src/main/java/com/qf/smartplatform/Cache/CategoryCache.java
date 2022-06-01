@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  * @Date 2022/5/27 15:37
  */
 
-@EnableAsync
+@EnableAsync(proxyTargetClass = true)
 @Component
 public class CategoryCache {
     private List<SysCategory> categoryList = new ArrayList<>();

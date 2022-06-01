@@ -28,6 +28,8 @@
             <mvc:exclude-mapping path="/sysusers/login"/>
             <mvc:exclude-mapping path="/sysusers/register"/>
             <mvc:exclude-mapping path="/websocket/*"/>
+            <mvc:exclude-mapping path="/colorcommand/*"/>
+            <mvc:exclude-mapping path="/humiture/*"/>
             <mvc:exclude-mapping path="/login.html"/>
             <mvc:exclude-mapping path="/index.html"/>
             <mvc:exclude-mapping path="/js/**"/>
@@ -37,6 +39,8 @@
     </mvc:interceptors>
     
     <websocket:handlers>
-        <websocket:mapping path="/websocket/*" handler="myTextMessageHandler"/>
+        <websocket:mapping path="/websocket/*" handler="myDevicePowerHandler"/>
+        <websocket:mapping path="/colorcommand/*" handler="myRGBColorHandler"/>
+        <websocket:mapping path="/humiture/*" handler="myDH11Handler"/>
     </websocket:handlers>
 </beans>

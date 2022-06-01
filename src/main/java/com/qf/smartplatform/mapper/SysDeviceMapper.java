@@ -30,4 +30,6 @@ public interface SysDeviceMapper {
 
     @Select("select * from sys_device where bind_user_id = #{uId}")
     List<SysDevice> findAllDeviceByUserId(@Param("uId") Long uId);
+
+    void updateDevice(SysDevice sysDevice);
 }

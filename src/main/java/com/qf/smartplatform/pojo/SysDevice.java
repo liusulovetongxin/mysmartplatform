@@ -13,17 +13,19 @@ public class SysDevice {
   private Long categoryId;
   private Long bindUserId;
   private Long sceneId;
-  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
+  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "Asia/Shanghai")
   private java.util.Date bindTime;
   private Long isOnline;
+  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "Asia/Shanghai")
   private java.util.Date connectTime;
+  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "Asia/Shanghai")
   private java.util.Date lostConnectTime;
+  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "Asia/Shanghai")
   private java.util.Date lastControlTime;
   private String currentConnectIp;
   private String connectLocation;
   private Long status;
 
   private SysCategory category;
-
 
 }

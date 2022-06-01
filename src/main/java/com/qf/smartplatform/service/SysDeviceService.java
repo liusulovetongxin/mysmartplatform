@@ -23,4 +23,8 @@ public interface SysDeviceService {
 
 
     List<SysDevice> findAllDevices(int page, int limit);
+
+    void sendControl(String deviceId, String command);
+
+    void updateDeviceOnlineOffline(String deviceId, String ip);
 }

@@ -47,4 +47,10 @@ public class SysDeviceController {
         sysDeviceService.bindDevice(deviceId,sceneId);
         return R.setOk();
     }
+
+    @PostMapping("/command/{deviceId}/{command}")
+    public R sendControl(@PathVariable String deviceId,@PathVariable String command){
+        sysDeviceService.sendControl(deviceId,command);
+        return R.setOk();
+    }
 }
