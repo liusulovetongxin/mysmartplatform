@@ -4,10 +4,12 @@
        xmlns:mvc="http://www.springframework.org/schema/mvc"
        xmlns:websocket="http://www.springframework.org/schema/websocket"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
        xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd 
 		http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.3.xsd 
-		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd">
 
     <context:component-scan base-package="com.qf.smartplatform.controller">
         <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
@@ -22,25 +24,26 @@
     </mvc:annotation-driven>
     <mvc:default-servlet-handler/>
     
-    <mvc:interceptors>
-        <mvc:interceptor>
-            <mvc:mapping path="/**"/>
-            <mvc:exclude-mapping path="/sysusers/login"/>
-            <mvc:exclude-mapping path="/sysusers/register"/>
-            <mvc:exclude-mapping path="/websocket/*"/>
-            <mvc:exclude-mapping path="/colorcommand/*"/>
-            <mvc:exclude-mapping path="/humiture/*"/>
-            <mvc:exclude-mapping path="/login.html"/>
-            <mvc:exclude-mapping path="/index.html"/>
-            <mvc:exclude-mapping path="/js/**"/>
-            <mvc:exclude-mapping path="/layui/**"/>
-            <ref bean="myLoginInterceptor"/>
-        </mvc:interceptor>
-    </mvc:interceptors>
-    
-    <websocket:handlers>
-        <websocket:mapping path="/websocket/*" handler="myDevicePowerHandler"/>
-        <websocket:mapping path="/colorcommand/*" handler="myRGBColorHandler"/>
-        <websocket:mapping path="/humiture/*" handler="myDH11Handler"/>
-    </websocket:handlers>
+<!--    <mvc:interceptors>-->
+<!--        <mvc:interceptor>-->
+<!--            <mvc:mapping path="/**"/>-->
+<!--            <mvc:exclude-mapping path="/sysusers/login"/>-->
+<!--            <mvc:exclude-mapping path="/sysusers/register"/>-->
+<!--            <mvc:exclude-mapping path="/websocket/*"/>-->
+<!--            <mvc:exclude-mapping path="/colorcommand/*"/>-->
+<!--            <mvc:exclude-mapping path="/humiture/*"/>-->
+<!--            <mvc:exclude-mapping path="/login.html"/>-->
+<!--            <mvc:exclude-mapping path="/index.html"/>-->
+<!--            <mvc:exclude-mapping path="/js/**"/>-->
+<!--            <mvc:exclude-mapping path="/layui/**"/>-->
+<!--            <ref bean="myLoginInterceptor"/>-->
+<!--        </mvc:interceptor>-->
+<!--    </mvc:interceptors>-->
+
+<!--    <websocket:handlers>-->
+<!--        <websocket:mapping path="/websocket/*" handler="myDevicePowerHandler"/>-->
+<!--        <websocket:mapping path="/colorcommand/*" handler="myRGBColorHandler"/>-->
+<!--        <websocket:mapping path="/humiture/*" handler="myDH11Handler"/>-->
+<!--    </websocket:handlers>-->
+    <aop:aspectj-autoproxy/>
 </beans>

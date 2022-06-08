@@ -2,6 +2,7 @@ package com.qf.smartplatform.service;
 
 import com.qf.smartplatform.pojo.SysHumiture;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
@@ -18,4 +19,7 @@ public interface SysHumitureService {
     void addSysHumiture(SysHumiture sysHumiture);
 
     Map findByTime(Date start, Date end);
+
+
+    void mutiAdd(Collection<SysHumiture> sysHumitures);
 }

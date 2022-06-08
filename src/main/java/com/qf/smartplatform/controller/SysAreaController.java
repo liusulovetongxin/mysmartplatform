@@ -18,7 +18,7 @@ import java.util.List;
  * @Date 2022/5/27 20:53
  */
 
-@RestController
+//@RestController
 @RequestMapping("/area")
 public class SysAreaController {
     private SysAreaService sysAreaService;

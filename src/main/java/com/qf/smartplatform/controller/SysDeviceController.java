@@ -3,6 +3,7 @@ package com.qf.smartplatform.controller;
 import com.github.pagehelper.PageInfo;
 import com.qf.smartplatform.dto.R;
 import com.qf.smartplatform.dto.SysDeviceDto;
+import com.qf.smartplatform.operlog.annotations.LogAnnotation;
 import com.qf.smartplatform.pojo.SysDevice;
 import com.qf.smartplatform.service.SysDeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,9 @@ public class SysDeviceController {
         this.sysDeviceService = sysDeviceService;
     }
 
+
     @GetMapping("/devices")
+    @LogAnnotation(title = "查询所有设备",businessType = 4)
     public R devices(@RequestParam(defaultValue = "1") int page,@RequestParam(defaultValue = "10") int limit){
         PageInfo<SysDevice> pageInfo = new PageInfo<>(sysDeviceService.findAllDevices(page, limit));
         return R.setOk(pageInfo);
@@ -49,6 +52,7 @@ public class SysDeviceController {
     }
 
     @PostMapping("/command/{deviceId}/{command}")
+    @LogAnnotation(title = "命令",businessType = 0)
     public R sendControl(@PathVariable String deviceId,@PathVariable String command){
         sysDeviceService.sendControl(deviceId,command);
         return R.setOk();

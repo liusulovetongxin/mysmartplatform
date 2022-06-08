@@ -4,14 +4,9 @@ import com.qf.smartplatform.event.CategoryChangeEvent;
 import com.qf.smartplatform.mapper.SysCategoryMapper;
 import com.qf.smartplatform.pojo.SysCategory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -22,57 +17,40 @@ import java.util.stream.Collectors;
  * @Project mysmartplatform
  * @Package com.qf.smartplatform.Cache
  * @Description:
- * @Date 2022/5/27 15:37
+ * @Date 2022/6/7 09:28
  */
-
-@EnableAsync(proxyTargetClass = true)
 @Component
-public class CategoryCache {
-    private List<SysCategory> categoryList = new ArrayList<>();
+public class CategoryCache extends BaseCache<Long, SysCategory, CategoryChangeEvent>{
 
-    private List<SysCategory> allEnableList = new ArrayList<>();
+    private List<SysCategory> allEnableList =new ArrayList<>();
 
-    private Map<Long,SysCategory> key2CategoryMap = new HashMap<>();
-    public List<SysCategory> getCategoryList(boolean isAll){
-        if (!isAll){
-            return allEnableList;
-        }
-        return categoryList;
+    public List<SysCategory> getAllEnableList() {
+        return allEnableList;
     }
-
-    public SysCategory getById(Long cId){
-        return key2CategoryMap.get(cId);
-    }
-
     private SysCategoryMapper sysCategoryMapper;
-
 
     @Autowired
     public void setSysCategoryMapper(SysCategoryMapper sysCategoryMapper) {
         this.sysCategoryMapper = sysCategoryMapper;
     }
 
-    @PostConstruct
-    public void init(){
-        List<SysCategory> list = sysCategoryMapper.findAll();
+    @Override
+    public void initData() {
+        //我就可以查询数据库加载所有的数据,然后保存起来
+        List<SysCategory> categoryList1 = sysCategoryMapper.findAll();
+        List<SysCategory> categoryList = getList();
         categoryList.clear();
-        categoryList.addAll(list);
-        key2CategoryMap.clear();
-        key2CategoryMap
-                .putAll(categoryList
-                        .stream()
-                        .collect(Collectors
-                                        .toMap(SysCategory::getCId,
-                                                sysCategory -> sysCategory)));
-        List<SysCategory> list2 = categoryList.stream().filter(sysCategory -> sysCategory.getStatus() == 1).collect(Collectors.toList());
+        categoryList.addAll(categoryList1);//保存到集合中
+        Map<Long, SysCategory> key2CategoryMap = getValueMap();
+        key2CategoryMap.clear();//清空一下,为了防止重新加载的时候导致删除的数据仍然在里面
+        key2CategoryMap.putAll(categoryList.stream().collect(Collectors.toMap(SysCategory::getCId, sysCategory -> sysCategory)));
+        //只获取有效的数据
         allEnableList.clear();
-        allEnableList.addAll(list2);
+        allEnableList.addAll(categoryList1.stream().filter(sysCategory -> sysCategory.getStatus() == 1).collect(Collectors.toList()));
     }
 
-    @EventListener
-    @Async
-    public void onEvent(CategoryChangeEvent categoryChangeEvent){
-        System.err.println(Thread.currentThread().getId());
-        init();
+    @Override
+    public void onEvent(CategoryChangeEvent event) {
+        super.onEvent(event);
     }
 }

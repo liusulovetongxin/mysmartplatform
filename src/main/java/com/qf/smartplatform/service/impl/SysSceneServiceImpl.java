@@ -5,8 +5,8 @@ import com.qf.smartplatform.constans.ResultCode;
 import com.qf.smartplatform.exceptions.AddException;
 import com.qf.smartplatform.mapper.SysSceneMapper;
 import com.qf.smartplatform.pojo.CheckType;
+import com.qf.smartplatform.pojo.MyBaseUser;
 import com.qf.smartplatform.pojo.SysScene;
-import com.qf.smartplatform.pojo.SysUserInfo;
 import com.qf.smartplatform.service.SysSceneService;
 import com.qf.smartplatform.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,9 +46,9 @@ public class SysSceneServiceImpl implements SysSceneService {
         Assert.isTrue(!sysScene.isEmpty(CheckType.ADD),()->{
             throw new AddException("传递的数据不完整", ResultCode.DATA_NULL);
         });
-        SysUserInfo sysUserInfo = SecurityUtils.getSysUserInfo(false);
+        MyBaseUser sysUserInfo = SecurityUtils.getSysUserInfo(false);
         try {
-            List<SysScene> sceneList = sysSceneCache.getSysUserScene().get(sysUserInfo.getUId());
+            List<SysScene> sceneList = sysSceneCache.getSysUserScene().get(sysUserInfo.getUserId());
             long count = sceneList.stream().filter(sysScene1 -> sysScene1.getSceneName().equals(sysScene.getSceneName())).count();
             Assert.isTrue(count==0,()->{
                 throw new AddException("场景已经存在", ResultCode.DATA_ALREADY_EXIST);
@@ -56,15 +56,15 @@ public class SysSceneServiceImpl implements SysSceneService {
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }
-        sysScene.setCreateBy(sysUserInfo.getUId());
+        sysScene.setCreateBy(sysUserInfo.getUserId());
         sysSceneMapper.addScene(sysScene);
     }
 
     @Override
     public List<SysScene> findAllSceneByUserId() {
-        SysUserInfo sysUserInfo = SecurityUtils.getSysUserInfo(false);
+        MyBaseUser sysUserInfo = SecurityUtils.getSysUserInfo(false);
         try {
-            return sysSceneCache.getSysUserScene().get(sysUserInfo.getUId());
+            return sysSceneCache.getSysUserScene().get(sysUserInfo.getUserId());
         } catch (ExecutionException e) {
             e.printStackTrace();
         }

@@ -1,8 +1,7 @@
 package com.qf.smartplatform.utils;
 
-import com.qf.smartplatform.pojo.SysUserInfo;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
+import com.qf.smartplatform.pojo.MyBaseUser;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
  * @author Administrator
@@ -14,13 +13,13 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  */
 
 public class SecurityUtils {
-    public static SysUserInfo getSysUserInfo(boolean test){
+    public static MyBaseUser getSysUserInfo(boolean test){
         if (test){
-            SysUserInfo sysUserInfo = new SysUserInfo();
-            sysUserInfo.setUsername("ceshiyonghu");
-            sysUserInfo.setUId(-1L);
-            return sysUserInfo;
+            MyBaseUser baseUser = new MyBaseUser("ceshizhanghao", "", null);
+            baseUser.setUserId(-1L);
+            return baseUser;
         }
-        return (SysUserInfo) ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest().getSession().getAttribute("user");
+        MyBaseUser principal = (MyBaseUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return principal;
     }
 }

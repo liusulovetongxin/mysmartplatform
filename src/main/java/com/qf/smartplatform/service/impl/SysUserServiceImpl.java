@@ -8,6 +8,7 @@ import com.qf.smartplatform.exceptions.QueryException;
 import com.qf.smartplatform.exceptions.UpdateException;
 import com.qf.smartplatform.mapper.SysUserMapper;
 import com.qf.smartplatform.pojo.CheckType;
+import com.qf.smartplatform.pojo.MyBaseUser;
 import com.qf.smartplatform.pojo.SysUserInfo;
 import com.qf.smartplatform.service.SysUserService;
 import com.qf.smartplatform.utils.MyStringUtils;
@@ -116,7 +117,7 @@ public class SysUserServiceImpl implements SysUserService {
 
     @Override
     public void updatePWD(String username, String password, String newPassword) {
-        SysUserInfo user = SecurityUtils.getSysUserInfo(false);
+        MyBaseUser user = SecurityUtils.getSysUserInfo(false);
         Assert.isTrue(user.getUsername().equalsIgnoreCase(username), ()->{
             throw new UpdateException("传入的用户名和当前用户不是同一人", ResultCode.USERNAME_PASSWORD_ERROR);
         });
@@ -126,9 +127,10 @@ public class SysUserServiceImpl implements SysUserService {
         Assert.notNull(newPassword, ()->{
             throw new UpdateException("密码不能为空",ResultCode.USERNAME_PASSWORD_ERROR);
         });
-        Assert.isTrue(DigestUtils.md5DigestAsHex((password+user.getPwdSalt()).getBytes(StandardCharsets.UTF_8)).equalsIgnoreCase(user.getPassword()),()->{
-            throw new UpdateException("原密码不正确", ResultCode.USERNAME_PASSWORD_ERROR);
-        });
+        // 修改密码会有错误，user里面没有这个字段，所以会出错，而且新的方法生成的密码没有盐，所以先注释掉
+//        Assert.isTrue(DigestUtils.md5DigestAsHex((password+user.getPwdSalt()).getBytes(StandardCharsets.UTF_8)).equalsIgnoreCase(user.getPassword()),()->{
+//            throw new UpdateException("原密码不正确", ResultCode.USERNAME_PASSWORD_ERROR);
+//        });
 
         SysUserInfo sysUserInfo = new SysUserInfo();
         sysUserInfo.setUsername(username);
@@ -151,7 +153,7 @@ public class SysUserServiceImpl implements SysUserService {
         });
         SysUserInfo sysUserInfo = new SysUserInfo();
         BeanUtils.copyProperties(userDto,sysUserInfo);
-        SysUserInfo userInfo = SecurityUtils.getSysUserInfo(false);
+        MyBaseUser userInfo = SecurityUtils.getSysUserInfo(false);
         sysUserInfo.setUsername(userInfo.getUsername());
         sysUserInfo.setUpdateTime(new Date());
         sysUserInfo.setUpdateBy(userInfo.getUsername());

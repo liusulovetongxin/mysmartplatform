@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -52,5 +49,13 @@ public class SysHumitureServiceImpl implements SysHumitureService {
         result.put("temperatureList", humidityList);
         result.put("humidityList", temperatureList);
         return result;
+    }
+
+    @Override
+    public void mutiAdd(Collection<SysHumiture> sysHumitures) {
+        if (sysHumitures == null||sysHumitures.size()==0){
+            return;
+        }
+        sysHumitureMapper.mutiAdd(sysHumitures);
     }
 }

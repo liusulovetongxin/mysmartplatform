@@ -78,7 +78,7 @@ public class SysDeviceServiceImpl implements SysDeviceService {
             throw new AddException("传递的数据不完整", ResultCode.DATA_NULL);
         });
         Long categoryId = sysDeviceDto.getCategoryId();
-        SysCategory sysCategory = categoryCache.getById(categoryId);
+        SysCategory sysCategory = categoryCache.get(categoryId);
         Assert.isTrue(sysCategory!=null && sysCategory.getStatus()==1, ()->{
             throw new AddException("分类不存在", ResultCode.CATEGORY_NOT_EXIST);
         });
@@ -103,10 +103,10 @@ public class SysDeviceServiceImpl implements SysDeviceService {
 
     @Override
     public int bindDevice(String deviceId, Long sceneId) {
-        SysUserInfo sysUserInfo = SecurityUtils.getSysUserInfo(false);
+        MyBaseUser sysUserInfo = SecurityUtils.getSysUserInfo(false);
         if(-1 != sceneId){
             try {
-                List<SysScene> sysScenes = sysSceneCache.getSysUserScene().get(sysUserInfo.getUId());
+                List<SysScene> sysScenes = sysSceneCache.getSysUserScene().get(sysUserInfo.getUserId());
                 long count = sysScenes.stream().filter(sysScene -> sysScene.getSceneId() == sceneId).count();
                 Assert.isTrue(count==1, ()->{
                     throw new AddException("场景不存在", ResultCode.SCENE_NOT_EXIST);
@@ -127,7 +127,7 @@ public class SysDeviceServiceImpl implements SysDeviceService {
         });
         SysDevice device = new SysDevice();
         device.setDeviceId(sysDevice.getDeviceId());
-        device.setBindUserId(sysUserInfo.getUId());
+        device.setBindUserId(sysUserInfo.getUserId());
         device.setBindTime(new Date());
         device.setSceneId(sceneId);
         return sysDeviceMapper.bindDevice(device);
@@ -136,12 +136,12 @@ public class SysDeviceServiceImpl implements SysDeviceService {
     @Override
     public List<SysDevice> findAllDevices(int page, int limit) {
         PageHelper.startPage(page, limit);
-        SysUserInfo sysUserInfo = SecurityUtils.getSysUserInfo(false);
-        Long uId = sysUserInfo.getUId();
+        MyBaseUser sysUserInfo = SecurityUtils.getSysUserInfo(false);
+        Long uId = sysUserInfo.getUserId();
         List<SysDevice> list = sysDeviceMapper.findAllDeviceByUserId(uId);
         list.forEach(sysDevice ->
                 sysDevice.setCategory(
-                        categoryCache.getById(sysDevice.getCategoryId())
+                        categoryCache.get(sysDevice.getCategoryId())
                 )
                 );
         return list;
@@ -153,7 +153,7 @@ public class SysDeviceServiceImpl implements SysDeviceService {
         Assert.notNull(categoryId, ()->{
             throw new QueryException("设备不存在", ResultCode.ID_NOTALLOWED);
         });
-        SysCategory sysCategory = categoryCache.getById(categoryId);
+        SysCategory sysCategory = categoryCache.get(categoryId);
         String txCommand = sysCategory.getTxCommand();
         Assert.hasText(txCommand, ()->{
             throw new QueryException("当前设备目前不支持该命令", ResultCode.DEVICE_COMMAND_NOT_SUPPORT);

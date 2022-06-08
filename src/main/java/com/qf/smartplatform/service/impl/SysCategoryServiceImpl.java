@@ -9,8 +9,8 @@ import com.qf.smartplatform.exceptions.DeleteDataException;
 import com.qf.smartplatform.exceptions.UpdateException;
 import com.qf.smartplatform.mapper.SysCategoryMapper;
 import com.qf.smartplatform.pojo.CheckType;
+import com.qf.smartplatform.pojo.MyBaseUser;
 import com.qf.smartplatform.pojo.SysCategory;
-import com.qf.smartplatform.pojo.SysUserInfo;
 import com.qf.smartplatform.service.SysCategoryService;
 import com.qf.smartplatform.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +59,7 @@ public class SysCategoryServiceImpl implements SysCategoryService {
             throw new AddException("传递的数据不完整", ResultCode.DATA_NULL);
         });
 
-        SysUserInfo sysUserInfo = SecurityUtils.getSysUserInfo(false);
+        MyBaseUser sysUserInfo = SecurityUtils.getSysUserInfo(false);
         sysCategory.setCreateBy(sysUserInfo.getUsername());
         sysCategoryMapper.addCategory(sysCategory);
         context.publishEvent(new CategoryChangeEvent());
@@ -67,7 +67,7 @@ public class SysCategoryServiceImpl implements SysCategoryService {
 
     @Override
     public PageInfo<SysCategory> findAll(int pageSize, int pageNum) {
-        List<SysCategory> categoryList = categoryCache.getCategoryList(true);
+        List<SysCategory> categoryList = categoryCache.getAllData();
         List<SysCategory> result = categoryList.stream()
                 .skip((pageNum - 1) * pageSize)
                 .limit(pageSize)
@@ -82,7 +82,7 @@ public class SysCategoryServiceImpl implements SysCategoryService {
         Assert.isTrue(cId>0, ()->{
             throw new DeleteDataException("主键不符合要求", ResultCode.ID_NOTALLOWED);
         });
-        SysUserInfo sysUserInfo = SecurityUtils.getSysUserInfo(false);
+        MyBaseUser sysUserInfo = SecurityUtils.getSysUserInfo(false);
         sysCategoryMapper.deleteById(cId,new Date(),sysUserInfo.getUsername());
         context.publishEvent(new CategoryChangeEvent());
     }
@@ -92,7 +92,7 @@ public class SysCategoryServiceImpl implements SysCategoryService {
         Assert.isTrue(!sysCategory.isEmpty(CheckType.UPDATE), ()->{
             throw new UpdateException("传递的数据不完成", ResultCode.DATA_NULL);
         });
-        SysUserInfo sysUserInfo = SecurityUtils.getSysUserInfo(false);
+        MyBaseUser sysUserInfo = SecurityUtils.getSysUserInfo(false);
         sysCategory.setUpdateTime(new Date());
         sysCategory.setUpdateBy(sysUserInfo.getUsername());
         sysCategoryMapper.updateCategory(sysCategory);
@@ -104,7 +104,7 @@ public class SysCategoryServiceImpl implements SysCategoryService {
         Assert.notEmpty(ids, ()->{
             throw new DeleteDataException("主键不符合要求", ResultCode.ID_NOTALLOWED);
         });
-        SysUserInfo sysUserInfo = SecurityUtils.getSysUserInfo(false);
+        MyBaseUser sysUserInfo = SecurityUtils.getSysUserInfo(false);
 
         sysCategoryMapper.deleteByIds(ids,sysUserInfo.getUsername(),new Date(),status);
         context.publishEvent(new CategoryChangeEvent());

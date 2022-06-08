@@ -26,4 +26,5 @@ public interface ResultCode {
     int DEVICE_ALREADY_BIND = 11;
     int DEVICE_STATUS_NOT_MATCH = 12;
     int DEVICE_COMMAND_NOT_SUPPORT = 13;
+    int DATA_NOT_EXIST = 14;
 }

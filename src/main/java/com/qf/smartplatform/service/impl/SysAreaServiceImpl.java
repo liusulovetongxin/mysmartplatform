@@ -11,7 +11,6 @@ import com.qf.smartplatform.pojo.SysArea;
 import com.qf.smartplatform.service.SysAreaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.util.List;
@@ -25,7 +24,7 @@ import java.util.stream.Collectors;
  * @Description:
  * @Date 2022/5/27 20:46
  */
-@Service
+//@Service
 public class SysAreaServiceImpl implements SysAreaService {
     private SysAreaMapper sysAreaMapper;
 

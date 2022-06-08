@@ -4,6 +4,7 @@ import com.qf.smartplatform.pojo.SysHumiture;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -21,4 +22,6 @@ public interface SysHumitureMapper {
     void addSysHumiture(SysHumiture sysHumiture);
 
     List<SysHumiture> findByTime(@Param("start") Date start,@Param("end") Date end);
+
+    void mutiAdd(@Param("sysHumitures") Collection<SysHumiture> sysHumitures);
 }

@@ -5,6 +5,7 @@ import com.qf.smartplatform.service.SysUserService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -51,5 +52,13 @@ public class TestSysUser {
         userDto.setEmail("ceshi@ceshi.com");
         userDto.setPhone("13344444444");
         userService.login(userDto);
+    }
+
+    @Test
+    public void testPassword(){
+        BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
+        String encode = bCryptPasswordEncoder.encode("mima");
+        System.err.println(encode);
+        System.out.println(encode);
     }
 }

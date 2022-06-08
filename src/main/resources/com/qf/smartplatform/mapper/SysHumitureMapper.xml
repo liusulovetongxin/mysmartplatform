@@ -5,6 +5,7 @@
 <mapper namespace="com.qf.smartplatform.mapper.SysHumitureMapper">
 
 
+
     <select id="findByTime" resultType="com.qf.smartplatform.pojo.SysHumiture">
         select * from sys_humiture
         <where>
@@ -16,4 +17,12 @@
             </if>
         </where>
     </select>
+
+    <insert id="mutiAdd">
+        insert into sys_humiture
+        values
+            <foreach collection="sysHumitures" open="(" close=")" separator="),(" item="sysHumiture">
+                null,#{sysHumiture.deviceId},#{sysHumiture.humidity},#{sysHumiture.temperature},#{sysHumiture.uploadTime}
+            </foreach>
+    </insert>
 </mapper>

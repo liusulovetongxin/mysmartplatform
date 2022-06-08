@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -22,7 +21,7 @@ import java.util.List;
  * @Date 2022/5/29 14:04
  */
 
-@Component
+//@Component
 @EnableAsync
 public class AreaCache {
     private List<SysArea> areaList = new ArrayList<>();
