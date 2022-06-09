@@ -23,4 +23,6 @@ public interface SysCategoryService {
     void updateCategory(SysCategory sysCategory);
 
     void deleteByIds(List<Long> ids, Long status);
+
+    PageInfo<SysCategory> findByNameAndStatus(String categoryName, Long status, int limit, int page);
 }

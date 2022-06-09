@@ -109,4 +109,20 @@ public class SysCategoryServiceImpl implements SysCategoryService {
         sysCategoryMapper.deleteByIds(ids,sysUserInfo.getUsername(),new Date(),status);
         context.publishEvent(new CategoryChangeEvent());
     }
+
+    @Override
+    public PageInfo<SysCategory> findByNameAndStatus(String categoryName, Long status, int limit, int page) {
+            List<SysCategory> categories = categoryCache.getAllData();
+            List<SysCategory> result = categories.stream()
+                    .filter(sysCategory -> categoryName==null||"".equalsIgnoreCase(categoryName)? true:sysCategory.getCategoryName().contains(categoryName))
+                    .filter(sysCategory -> status==null||status==-100? true: sysCategory.getStatus()==status)
+                    .collect(Collectors.toList());
+        List<SysCategory> result2 = result.stream().skip((page - 1) * limit)
+                .limit(limit).collect(Collectors.toList());
+        System.err.println(result);
+            PageInfo<SysCategory> pageInfo = new PageInfo<>(result2);
+            pageInfo.setTotal(result.size());
+            return pageInfo;
+
+    }
 }

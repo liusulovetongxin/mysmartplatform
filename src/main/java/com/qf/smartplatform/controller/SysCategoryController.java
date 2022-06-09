@@ -47,8 +47,11 @@ public class SysCategoryController {
     }
 
     @GetMapping("/categories")
-    public R findByPage(int limit,int page){
-        return R.setOk(sysCategoryService.findAll(limit, page));
+    public R findByPage(int limit,int page,String categoryName,Long status){
+        System.err.println(categoryName+""+status);
+        return R.setOk(sysCategoryService.findByNameAndStatus(categoryName,status,limit,page));
+
+//        return R.setOk(sysCategoryService.find(limit, page));
     }
 
     @DeleteMapping("/categories")
