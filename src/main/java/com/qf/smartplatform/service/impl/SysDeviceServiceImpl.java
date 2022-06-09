@@ -17,6 +17,7 @@ import com.qf.smartplatform.pojo.*;
 import com.qf.smartplatform.service.SysDeviceService;
 import com.qf.smartplatform.utils.RequestUtil;
 import com.qf.smartplatform.utils.SecurityUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -198,8 +199,13 @@ public class SysDeviceServiceImpl implements SysDeviceService {
 
     @Override
     public void updateDevice(SysDeviceDto sysDeviceDto) {
-        Assert.isTrue(sysDeviceDto.isEmpty(CheckType.UPDATE),()->{
+        Assert.isTrue(!sysDeviceDto.isEmpty(CheckType.UPDATE),()->{
             throw new UpdateException("修改设备失败", ResultCode.DATA_NULL);
         });
+
+        SysDevice sysDevice = new SysDevice();
+        BeanUtils.copyProperties(sysDeviceDto, sysDevice);
+        sysDeviceMapper.updateDevice(sysDevice);
+
     }
 }
