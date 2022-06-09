@@ -27,11 +27,25 @@ public class SysCategoryController {
         this.sysCategoryService = sysCategoryService;
     }
 
-    @RequestMapping("/category")
+   // @RequestMapping("/category")
     public R addCategory(@RequestBody SysCategory sysCategory){
+        System.err.println("");
         sysCategoryService.addCategory(sysCategory);
         return R.setOk();
     }
+    @PutMapping("/category")
+    public R updateCategoryByPut(@RequestBody SysCategory sysCategory){
+        System.err.println(sysCategory);
+        sysCategoryService.updateCategory(sysCategory);
+        return R.setOk();
+    }
+    @PostMapping("/category")
+    public R category(@RequestBody SysCategory sysCategory){
+        System.err.println("");
+        sysCategoryService.addCategory(sysCategory);
+        return R.setOk();
+    }
+
     @GetMapping("/categories")
     public R findByPage(int limit,int page){
         return R.setOk(sysCategoryService.findAll(limit, page));
