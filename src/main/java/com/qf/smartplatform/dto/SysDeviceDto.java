@@ -27,6 +27,8 @@ public class SysDeviceDto implements CheckNull {
         switch (type){
             case ADD:
                 return !StringUtils.hasText(deviceId)||!StringUtils.hasText(deviceName)|| ObjectUtils.isEmpty(categoryId);
+            case UPDATE:
+                return !StringUtils.hasText(deviceId)||!StringUtils.hasText(deviceName)|| ObjectUtils.isEmpty(categoryId);
         }
         return false;
     }

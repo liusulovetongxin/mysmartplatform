@@ -40,6 +40,19 @@ public class SysDeviceController {
         sysDeviceService.addDevice(sysDeviceDto);
         return R.setOk();
     }
+
+    @PostMapping("/device")
+    public R device(@RequestBody SysDeviceDto sysDeviceDto){
+        System.err.println(sysDeviceDto);
+        sysDeviceService.addDevice(sysDeviceDto);
+        return R.setOk();
+    }
+    @PutMapping ("/device")
+    public R updateDevice(@RequestBody SysDeviceDto sysDeviceDto){
+        System.err.println(sysDeviceDto);
+        sysDeviceService.updateDevice(sysDeviceDto);
+        return R.setOk();
+    }
     @PostMapping("/device/sell/{deviceId}")
     public R update2Sell(@PathVariable String deviceId) {
         sysDeviceService.update2Sell(deviceId);

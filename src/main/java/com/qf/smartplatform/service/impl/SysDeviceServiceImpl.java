@@ -20,6 +20,7 @@ import com.qf.smartplatform.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.util.Date;
@@ -36,6 +37,7 @@ import java.util.concurrent.ExecutionException;
  * @Date 2022/5/30 11:39
  */
 @Service
+@Transactional
 public class SysDeviceServiceImpl implements SysDeviceService {
     private ObjectMapper objectMapper;
 
@@ -83,6 +85,8 @@ public class SysDeviceServiceImpl implements SysDeviceService {
             throw new AddException("分类不存在", ResultCode.CATEGORY_NOT_EXIST);
         });
         sysDeviceMapper.addDevice(sysDeviceDto);
+        update2Sell(sysDeviceDto.getDeviceId());
+        bindDevice(sysDeviceDto.getDeviceId(), 17L);
 
     }
 
@@ -190,5 +194,12 @@ public class SysDeviceServiceImpl implements SysDeviceService {
             sysDevice.setIsOnline(0L);
         }
         sysDeviceMapper.updateDevice(sysDevice);
+    }
+
+    @Override
+    public void updateDevice(SysDeviceDto sysDeviceDto) {
+        Assert.isTrue(sysDeviceDto.isEmpty(CheckType.UPDATE),()->{
+            throw new UpdateException("修改设备失败", ResultCode.DATA_NULL);
+        });
     }
 }

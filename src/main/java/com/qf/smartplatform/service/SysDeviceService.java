@@ -21,10 +21,11 @@ public interface SysDeviceService {
 
     int bindDevice(String deviceId,Long sceneId);
 
-
     List<SysDevice> findAllDevices(int page, int limit);
 
     void sendControl(String deviceId, String command);
 
     void updateDeviceOnlineOffline(String deviceId, String ip);
+
+    void updateDevice(SysDeviceDto sysDeviceDto);
 }
