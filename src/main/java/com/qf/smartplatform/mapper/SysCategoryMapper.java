@@ -28,7 +28,7 @@ public interface SysCategoryMapper {
     @Update("update sys_category set status=0,update_time=#{updateTime},update_by=#{username} where c_id=#{cId}")
     void deleteById(@Param("cId") Long cId,@Param("updateTime") Date updateTime,@Param("username") String username);
 
-    @Update("update sys_category set category_name=#{categoryName},update_time=#{updateTime},update_by=#{updateBy} where c_id = #{cId}")
+
     void updateCategory(SysCategory sysCategory);
 
     void deleteByIds(@Param("ids") List<Long> ids,@Param("username") String username,@Param("date") Date date,@Param("status") Long status);

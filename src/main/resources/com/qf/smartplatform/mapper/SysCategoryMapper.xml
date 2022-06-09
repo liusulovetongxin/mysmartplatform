@@ -15,4 +15,38 @@
             #{id}
         </foreach>
     </update>
+    <update id="updateCategory">
+        update sys_category
+        <set>
+            <if test="categoryName!=null and categoryName != ''">
+                category_name=#{categoryName},
+            </if>
+            <if test="txCommand!=null and txCommand != ''">
+                tx_command=#{txCommand},
+            </if>
+            <if test="rxCommand!=null and rxCommand != ''">
+                rx_command=#{rxCommand},
+            </if>
+            <if test="commandName!=null and commandName != ''">
+                command_name=#{commandName},
+            </if>
+            <if test="status!=null">
+                status=#{status},
+            </if>
+
+            <if test="createTime!=null">
+                create_time=#{createTime},
+            </if>
+            <if test="createBy!=null and createBy != ''">
+                create_by=#{createBy},
+            </if>
+            <if test="updateTime!=null">
+                update_time=#{updateTime},
+            </if>
+            <if test="updateBy!=null and updateBy != ''">
+                update_by=#{updateBy},
+            </if>
+        </set>
+            where c_id = #{cId}
+    </update>
 </mapper>
