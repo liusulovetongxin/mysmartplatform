@@ -3,6 +3,7 @@ package com.qf.smartplatform.operlog;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qf.smartplatform.exceptions.BaseException;
+import com.qf.smartplatform.mapper.SysOperLogMapper;
 import com.qf.smartplatform.operlog.annotations.LogAnnotation;
 import com.qf.smartplatform.pojo.MyBaseUser;
 import com.qf.smartplatform.pojo.SysOperLog;
@@ -36,6 +37,13 @@ import java.util.concurrent.CompletableFuture;
 @Aspect
 @Component
 public class LogAdvice {
+    private SysOperLogMapper sysOperLogMapper;
+
+    @Autowired
+    public void setSysOperLogMapper(SysOperLogMapper sysOperLogMapper) {
+        this.sysOperLogMapper = sysOperLogMapper;
+    }
+
     private ObjectMapper objectMapper;
 
     @Autowired
@@ -134,6 +142,7 @@ public class LogAdvice {
             sysOperLog.setOperLocation(location);
             sysOperLog.setOperTime(new Date());
             System.err.println(sysOperLog);
+            sysOperLogMapper.addSysOperLog(sysOperLog);
         });
 
     }
